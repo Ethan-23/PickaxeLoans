@@ -22,13 +22,15 @@ public class LoanRepository {
     private final PriorityQueue<Loan> endsAtHeap = new PriorityQueue<>(Comparator.comparingLong(loan -> loan.getActiveLoan().getEndsAt()));
 
     public BorrowResult createLoan(UUID lender, Loan loan){
-        if(!lenderToLoans.containsKey(lender))
+        if(!lenderToLoans.containsKey(lender)){
             lenderToLoans.put(lender, new HashSet<>());
+        }
 
         UUID loanUUID = loan.getLoanUUID();
 
-        if(lenderToLoans.get(lender).contains(loanUUID))
+        if(lenderToLoans.get(lender).contains(loanUUID)){
             return BorrowResult.DUPLICATE_LOAN;
+        }
 
         lenderToLoans.get(lender).add(loan.getLoanUUID());
         loans.put(loan.getLoanUUID(), loan);
@@ -40,13 +42,15 @@ public class LoanRepository {
     }
 
     public BorrowResult cancelLoan(UUID loanUUID){
-        if(!loans.containsKey(loanUUID))
+        if(!loans.containsKey(loanUUID)){
             return BorrowResult.NOT_FOUND;
+        }
 
         Loan loan = loans.get(loanUUID);
 
-        if(loan.getLoanState() != LoanState.LISTED)
+        if(loan.getLoanState() != LoanState.LISTED){
             return BorrowResult.NOT_LISTED;
+        }
 
         loan.setLoanState(LoanState.CANCELLED);
 
@@ -55,16 +59,19 @@ public class LoanRepository {
 
     public BorrowResult borrowLoan(UUID borrowerUUID, UUID loanUUID){
 
-        if(borrowerToLoan.containsKey(borrowerUUID))
+        if(borrowerToLoan.containsKey(borrowerUUID)){
             return BorrowResult.ALREADY_BORROWING;
+        }
 
-        if(!loans.containsKey(loanUUID))
+        if(!loans.containsKey(loanUUID)){
             return BorrowResult.NOT_FOUND;
+        }
 
         Loan loan = loans.get(loanUUID);
 
-        if(loan.getLoanState() != LoanState.LISTED)
+        if(loan.getLoanState() != LoanState.LISTED){
             return BorrowResult.NOT_LISTED;
+        }
 
         ActiveLoan activeLoan = new ActiveLoan(
                 borrowerUUID,
@@ -81,13 +88,15 @@ public class LoanRepository {
     }
 
     public BorrowResult returnLoan(UUID loanUUID){
-        if(!loans.containsKey(loanUUID))
+        if(!loans.containsKey(loanUUID)){
             return BorrowResult.NOT_FOUND;
+        }
 
         Loan loan = loans.get(loanUUID);
 
-        if(loan.getLoanState() != LoanState.BORROWED)
+        if(loan.getLoanState() != LoanState.BORROWED){
             return BorrowResult.NOT_BORROWED;
+        }
 
         borrowerToLoan.remove(loan.getActiveLoan().getBorrowerUUID());
 
@@ -97,13 +106,15 @@ public class LoanRepository {
     }
 
     public BorrowResult expireLoan(UUID loanUUID){
-        if(!loans.containsKey(loanUUID))
+        if(!loans.containsKey(loanUUID)){
             return BorrowResult.NOT_FOUND;
+        }
 
         Loan loan = loans.get(loanUUID);
 
-        if(loan.getLoanState() != LoanState.LISTED)
+        if(loan.getLoanState() != LoanState.LISTED){
             return BorrowResult.NOT_LISTED;
+        }
 
         loan.setLoanState(LoanState.EXPIRED);
         return BorrowResult.SUCCESS;
@@ -114,8 +125,9 @@ public class LoanRepository {
     }
 
     public Set<UUID> getLoansByLender(UUID lenderUUID){
-        if(!lenderToLoans.containsKey(lenderUUID))
+        if(!lenderToLoans.containsKey(lenderUUID)){
             return new HashSet<>(Set.of());
+        }
 
         return Collections.unmodifiableSet(lenderToLoans.get(lenderUUID));
     }
