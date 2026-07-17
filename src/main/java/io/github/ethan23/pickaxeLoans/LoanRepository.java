@@ -75,7 +75,7 @@ public class LoanRepository {
 
         ActiveLoan activeLoan = new ActiveLoan(
                 borrowerUUID,
-                loan.getLoanDurationMillis()
+                loan.getLoanDeal().getLoanDurationMillis()
         );
         loan.setActiveLoan(activeLoan);
 

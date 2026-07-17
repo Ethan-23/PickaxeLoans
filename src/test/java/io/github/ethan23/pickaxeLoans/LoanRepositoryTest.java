@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class LoanRepositoryTest {
 
     private Loan newLoan(UUID lenderUUID) {
-        return new Loan(null, lenderUUID, CostType.MONEY, 100L, 10, 10, 60_000L);
+        return new Loan(null, lenderUUID);
     }
 
     @Test
