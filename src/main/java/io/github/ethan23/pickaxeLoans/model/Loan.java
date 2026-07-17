@@ -8,28 +8,20 @@ public class Loan {
     private final UUID loanUUID;
     private final ItemStack pickaxe;
     private final UUID lenderUUID;
-    private CostType costType;
-    private long upfrontCost;
-    private int xpTaxPercent;
-    private int energyTaxPercent;
+    private final LoanDeal loanDeal;
     private final long createdAt;
     private final long listingExpiresAt;
-    private long loanDurationMillis;
     private LoanState loanState;
     private ActiveLoan activeLoan;
 
     private final static long EXPIRATION_TIME = 3_600_000;
 
-    public Loan(ItemStack pickaxe, UUID lenderUUID, CostType costType, long upfrontCost, int xpTaxPercent, int energyTaxPercent, long loanDurationMillis) {
+    public Loan(ItemStack pickaxe, UUID lenderUUID) {
         this.loanUUID = UUID.randomUUID();
         this.pickaxe = pickaxe;
         this.lenderUUID = lenderUUID;
-        this.costType = costType;
-        this.upfrontCost = upfrontCost;
-        this.xpTaxPercent = xpTaxPercent;
-        this.energyTaxPercent = energyTaxPercent;
+        this.loanDeal = new LoanDeal();
         this.createdAt = System.currentTimeMillis();
-        this.loanDurationMillis = loanDurationMillis;
         this.listingExpiresAt = this.createdAt + EXPIRATION_TIME;
         this.loanState = LoanState.LISTED;
         this.activeLoan = null;
@@ -47,20 +39,8 @@ public class Loan {
         return lenderUUID;
     }
 
-    public CostType getCostType() {
-        return costType;
-    }
-
-    public long getUpfrontCost() {
-        return upfrontCost;
-    }
-
-    public int getXpTaxPercent() {
-        return xpTaxPercent;
-    }
-
-    public int getEnergyTaxPercent() {
-        return energyTaxPercent;
+    public LoanDeal getLoanDeal() {
+        return loanDeal;
     }
 
     public long getCreatedAt() {
@@ -69,10 +49,6 @@ public class Loan {
 
     public long getListingExpiresAt() {
         return listingExpiresAt;
-    }
-
-    public long getLoanDurationMillis() {
-        return loanDurationMillis;
     }
 
     public LoanState getLoanState() {
