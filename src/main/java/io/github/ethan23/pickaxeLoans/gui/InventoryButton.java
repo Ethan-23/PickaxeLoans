@@ -14,6 +14,12 @@ public class InventoryButton {
         this.handler = handler;
     }
 
+
+    public InventoryButton(ItemStack icon) {
+        this.icon = icon;
+        this.handler = e -> {};
+    }
+
     public ItemStack getIcon() { return icon; }
     public void onClick(InventoryClickEvent event) { handler.accept(event); }
 }

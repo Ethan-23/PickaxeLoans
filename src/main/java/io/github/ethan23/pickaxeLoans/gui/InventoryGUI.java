@@ -24,6 +24,10 @@ public abstract class InventoryGUI implements InventoryHandler {
         this.buttonMap.put(slot, inventoryButton);
     }
 
+    public void removeButton(int slot){
+        this.buttonMap.remove(slot);
+    }
+
     public void decorate() {
         this.buttonMap.forEach((slot, button) -> this.inventory.setItem(slot, button.getIcon()));
     }
