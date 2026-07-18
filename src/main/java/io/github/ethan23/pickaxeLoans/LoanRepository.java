@@ -10,7 +10,7 @@ import java.util.*;
 public class LoanRepository {
 
     //lenderUUID, Set<loanUUID>
-    private final HashMap <UUID, Set<UUID>> lenderToLoans = new HashMap<>();
+    private final HashMap <UUID, LinkedHashSet<UUID>> lenderToLoans = new HashMap<>();
 
     //loanUUID, loan
     private final LinkedHashMap <UUID, Loan> loans = new LinkedHashMap<>();
@@ -21,18 +21,19 @@ public class LoanRepository {
     private final PriorityQueue<Loan> expirationHeap = new PriorityQueue<>(Comparator.comparingLong(Loan::getListingExpiresAt));
     private final PriorityQueue<Loan> endsAtHeap = new PriorityQueue<>(Comparator.comparingLong(loan -> loan.getActiveLoan().getEndsAt()));
 
-    public BorrowResult createLoan(UUID lender, Loan loan){
-        if(!lenderToLoans.containsKey(lender)){
-            lenderToLoans.put(lender, new HashSet<>());
+    public BorrowResult createLoan(Loan loan){
+        UUID lenderUUID = loan.getLenderUUID();
+        if(!lenderToLoans.containsKey(lenderUUID)){
+            lenderToLoans.put(lenderUUID, new LinkedHashSet<>());
         }
 
         UUID loanUUID = loan.getLoanUUID();
 
-        if(lenderToLoans.get(lender).contains(loanUUID)){
+        if(lenderToLoans.get(lenderUUID).contains(loanUUID)){
             return BorrowResult.DUPLICATE_LOAN;
         }
 
-        lenderToLoans.get(lender).add(loan.getLoanUUID());
+        lenderToLoans.get(lenderUUID).add(loan.getLoanUUID());
         loans.put(loan.getLoanUUID(), loan);
         expirationHeap.add(loan);
 
@@ -156,4 +157,8 @@ public class LoanRepository {
         return Optional.ofNullable(borrowerToLoan.get(uuid));
     }
 
+    public void deleteLoan(Loan loan) {
+        loans.remove(loan.getLoanUUID());
+        lenderToLoans.get(loan.getLenderUUID()).remove(loan.getLoanUUID());
+    }
 }
