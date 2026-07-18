@@ -16,11 +16,11 @@ public class Loan {
 
     private final static long EXPIRATION_TIME = 3_600_000;
 
-    public Loan(ItemStack pickaxe, UUID lenderUUID) {
+    public Loan(ItemStack pickaxe, UUID lenderUUID, LoanDeal loanDeal) {
         this.loanUUID = UUID.randomUUID();
         this.pickaxe = pickaxe;
         this.lenderUUID = lenderUUID;
-        this.loanDeal = new LoanDeal();
+        this.loanDeal = loanDeal;
         this.createdAt = System.currentTimeMillis();
         this.listingExpiresAt = this.createdAt + EXPIRATION_TIME;
         this.loanState = LoanState.LISTED;
@@ -32,7 +32,7 @@ public class Loan {
     }
 
     public ItemStack getPickaxe() {
-        return pickaxe;
+        return pickaxe.clone();
     }
 
     public UUID getLenderUUID() {

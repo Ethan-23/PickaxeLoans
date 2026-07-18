@@ -1,9 +1,6 @@
 package io.github.ethan23.pickaxeLoans;
 
-import io.github.ethan23.pickaxeLoans.model.BorrowResult;
-import io.github.ethan23.pickaxeLoans.model.CostType;
-import io.github.ethan23.pickaxeLoans.model.Loan;
-import io.github.ethan23.pickaxeLoans.model.LoanState;
+import io.github.ethan23.pickaxeLoans.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -13,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class LoanRepositoryTest {
 
     private Loan newLoan(UUID lenderUUID) {
-        return new Loan(null, lenderUUID);
+        return new Loan(null, lenderUUID, new LoanDeal());
     }
 
     @Test
@@ -22,7 +19,7 @@ public class LoanRepositoryTest {
         UUID lender = UUID.randomUUID();
         Loan loan = newLoan(lender);
 
-        BorrowResult borrowResult = repo.createLoan(lender, loan);
+        BorrowResult borrowResult = repo.createLoan(loan);
 
         assertEquals(BorrowResult.SUCCESS, borrowResult);
         assertEquals(loan, repo.findById(loan.getLoanUUID()).orElseThrow());
@@ -35,8 +32,8 @@ public class LoanRepositoryTest {
     void createLoan_secondLoanFromSameLender_bothTracked() {
         LoanRepository repo = new LoanRepository();
         UUID lender = UUID.randomUUID();
-        BorrowResult borrowResult1 = repo.createLoan(lender, newLoan(lender));
-        BorrowResult borrowResult2 = repo.createLoan(lender, newLoan(lender));
+        BorrowResult borrowResult1 = repo.createLoan(newLoan(lender));
+        BorrowResult borrowResult2 = repo.createLoan(newLoan(lender));
 
         assertEquals(BorrowResult.SUCCESS, borrowResult1);
         assertEquals(BorrowResult.SUCCESS, borrowResult2);
@@ -50,8 +47,8 @@ public class LoanRepositoryTest {
 
         Loan loan = newLoan(lender);
 
-        BorrowResult borrowResult1 = repo.createLoan(lender, loan);
-        BorrowResult borrowResult2 = repo.createLoan(lender, loan);
+        BorrowResult borrowResult1 = repo.createLoan(loan);
+        BorrowResult borrowResult2 = repo.createLoan(loan);
 
         assertEquals(BorrowResult.SUCCESS, borrowResult1);
         assertEquals(BorrowResult.DUPLICATE_LOAN, borrowResult2);
@@ -66,7 +63,7 @@ public class LoanRepositoryTest {
 
         Loan loan = newLoan(lender);
 
-        repo.createLoan(lender, loan);
+        repo.createLoan(loan);
 
         BorrowResult borrowResult = repo.cancelLoan(loan.getLoanUUID());
 
@@ -82,7 +79,7 @@ public class LoanRepositoryTest {
 
         Loan loan = newLoan(lender);
 
-        repo.createLoan(lender, loan);
+        repo.createLoan(loan);
 
         BorrowResult borrowResult = repo.cancelLoan(lender);
 
@@ -96,7 +93,7 @@ public class LoanRepositoryTest {
 
         Loan loan = newLoan(lender);
 
-        repo.createLoan(lender, loan);
+        repo.createLoan(loan);
 
         loan.setLoanState(LoanState.RETURNED);
 
@@ -114,7 +111,7 @@ public class LoanRepositoryTest {
 
         Loan loan = newLoan(lender);
 
-        repo.createLoan(lender, loan);
+        repo.createLoan(loan);
 
         BorrowResult borrowResult = repo.cancelLoan(loan.getLoanUUID());
         BorrowResult borrowResult2 = repo.cancelLoan(loan.getLoanUUID());
@@ -131,7 +128,7 @@ public class LoanRepositoryTest {
         UUID borrower = UUID.randomUUID();
         Loan loan = newLoan(lender);
 
-        repo.createLoan(lender, loan);
+        repo.createLoan(loan);
 
         BorrowResult borrowResult = repo.borrowLoan(borrower, loan.getLoanUUID());
 
@@ -150,8 +147,8 @@ public class LoanRepositoryTest {
         Loan loan = newLoan(lender);
         Loan loan2 = newLoan(lender);
 
-        repo.createLoan(lender, loan);
-        repo.createLoan(lender, loan2);
+        repo.createLoan(loan);
+        repo.createLoan(loan2);
 
         BorrowResult borrowResult = repo.borrowLoan(borrower, loan.getLoanUUID());
         BorrowResult borrowResult2 = repo.borrowLoan(borrower, loan2.getLoanUUID());
@@ -170,7 +167,7 @@ public class LoanRepositoryTest {
         UUID borrower2 = UUID.randomUUID();
         Loan loan = newLoan(lender);
 
-        repo.createLoan(lender, loan);
+        repo.createLoan(loan);
 
         BorrowResult borrowResult = repo.borrowLoan(borrower, loan.getLoanUUID());
         BorrowResult borrowResult2 = repo.borrowLoan(borrower2, loan.getLoanUUID());
@@ -187,7 +184,7 @@ public class LoanRepositoryTest {
         UUID borrower = UUID.randomUUID();
         Loan loan = newLoan(lender);
 
-        repo.createLoan(lender, loan);
+        repo.createLoan(loan);
 
         repo.borrowLoan(borrower, loan.getLoanUUID());
 
@@ -204,7 +201,7 @@ public class LoanRepositoryTest {
         UUID borrower = UUID.randomUUID();
         Loan loan = newLoan(lender);
 
-        repo.createLoan(lender, loan);
+        repo.createLoan(loan);
 
         repo.borrowLoan(borrower, loan.getLoanUUID());
 
@@ -224,7 +221,7 @@ public class LoanRepositoryTest {
 
         Loan loan = newLoan(lender);
 
-        repo.createLoan(lender, loan);
+        repo.createLoan(loan);
 
         BorrowResult borrowResult = repo.expireLoan(loan.getLoanUUID());
 
@@ -239,7 +236,7 @@ public class LoanRepositoryTest {
 
         Loan loan = newLoan(lender);
 
-        repo.createLoan(lender, loan);
+        repo.createLoan(loan);
 
         loan.setLoanState(LoanState.BORROWED);
 
