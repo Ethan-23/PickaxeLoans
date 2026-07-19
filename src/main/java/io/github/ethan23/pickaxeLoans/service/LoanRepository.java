@@ -39,6 +39,7 @@ public class LoanRepository {
 
     public void recordReturn(Loan loan){
         borrowerToLoan.remove(loan.getActiveLoan().getBorrowerUUID());
+        endsAtHeap.remove(loan);
     }
 
     public void deleteLoan(Loan loan) {
