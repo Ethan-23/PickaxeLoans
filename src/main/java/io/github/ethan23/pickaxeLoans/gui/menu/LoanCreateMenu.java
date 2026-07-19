@@ -10,7 +10,6 @@ import io.github.ethan23.pickaxeLoans.model.CostType;
 import io.github.ethan23.pickaxeLoans.model.Loan;
 import io.github.ethan23.pickaxeLoans.model.LoanDeal;
 import io.github.ethan23.pickaxeLoans.model.LoanResult;
-import io.github.ethan23.pickaxeLoans.util.ColorTextBuilder;
 import io.github.ethan23.pickaxeLoans.util.ItemBuilder;
 import io.github.ethan23.pickaxeLoans.util.NumberConversions;
 import net.kyori.adventure.text.Component;
