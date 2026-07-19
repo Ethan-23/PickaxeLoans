@@ -2,7 +2,7 @@ package io.github.ethan23.pickaxeLoans;
 
 import io.github.ethan23.pickaxeLoans.commands.LoanCommand;
 import io.github.ethan23.pickaxeLoans.commands.LoanCommandTabComplete;
-import io.github.ethan23.pickaxeLoans.database.DirtyLoanCleaner;
+import io.github.ethan23.pickaxeLoans.task.DirtyLoanCleaner;
 import io.github.ethan23.pickaxeLoans.database.LoanStorage;
 import io.github.ethan23.pickaxeLoans.database.SqliteLoanStorage;
 import io.github.ethan23.pickaxeLoans.events.PlayerDeathListener;
@@ -10,6 +10,9 @@ import io.github.ethan23.pickaxeLoans.events.PlayerDropListener;
 import io.github.ethan23.pickaxeLoans.events.PlayerJoinListener;
 import io.github.ethan23.pickaxeLoans.gui.GUIListener;
 import io.github.ethan23.pickaxeLoans.gui.PlayerInputListener;
+import io.github.ethan23.pickaxeLoans.service.LoanRepository;
+import io.github.ethan23.pickaxeLoans.service.LoanService;
+import io.github.ethan23.pickaxeLoans.task.LoanUpdateTick;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 

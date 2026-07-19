@@ -1,4 +1,4 @@
-package io.github.ethan23.pickaxeLoans;
+package io.github.ethan23.pickaxeLoans.item;
 
 import org.bukkit.NamespacedKey;
 

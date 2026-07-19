@@ -1,6 +1,6 @@
 package io.github.ethan23.pickaxeLoans.model;
 
-import io.github.ethan23.pickaxeLoans.LoanKeys;
+import io.github.ethan23.pickaxeLoans.item.LoanKeys;
 import io.github.ethan23.pickaxeLoans.database.LoanRecord;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;

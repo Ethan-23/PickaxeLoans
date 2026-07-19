@@ -1,6 +1,5 @@
-package io.github.ethan23.pickaxeLoans;
+package io.github.ethan23.pickaxeLoans.service;
 
-import io.github.ethan23.pickaxeLoans.database.LoanRecord;
 import io.github.ethan23.pickaxeLoans.database.LoanStorage;
 import io.github.ethan23.pickaxeLoans.model.*;
 
@@ -29,7 +28,7 @@ public class LoanService {
         if (!repository.add(loan)) {
             return LoanResult.DUPLICATE_LOAN;
         }
-        loanStorage.upsert(loan.toRecord());
+        loanStorage.upsert(loan);
         return LoanResult.SUCCESS;
     }
 
@@ -45,7 +44,7 @@ public class LoanService {
         }
 
         loan.cancel();
-        loanStorage.upsert(loan.toRecord());
+        loanStorage.upsert(loan);
         return LoanResult.SUCCESS;
     }
 
@@ -64,7 +63,7 @@ public class LoanService {
 
         loan.markBorrowed(new ActiveLoan(borrowerUUID, loan.getLoanDeal().getLoanDurationMillis()));
         repository.recordBorrow(loan);
-        loanStorage.upsert(loan.toRecord());
+        loanStorage.upsert(loan);
         return LoanResult.SUCCESS;
     }
 
@@ -74,7 +73,7 @@ public class LoanService {
             return LoanResult.NOT_LISTED;
         }
         loan.expire();
-        loanStorage.upsert(loan.toRecord());
+        loanStorage.upsert(loan);
         return LoanResult.SUCCESS;
     }
 
@@ -94,7 +93,7 @@ public class LoanService {
 
         loan.markReturned();
         repository.recordReturn(loan);
-        loanStorage.upsert(loan.toRecord());
+        loanStorage.upsert(loan);
         return LoanResult.SUCCESS;
     }
 
@@ -204,7 +203,7 @@ public class LoanService {
                     continue;
                 }
 
-                loanStorage.upsert(loan.toRecord());
+                loanStorage.upsert(loan);
             }
             dirtyLoans.clear();
         } catch (Exception e) {
@@ -214,8 +213,7 @@ public class LoanService {
     }
 
     public void loadFromStorage(){
-        for(LoanRecord loanRecord : loanStorage.loadAll()){
-            Loan loan = Loan.fromRecord(loanRecord);
+        for(Loan loan : loanStorage.loadAll()){
             repository.add(loan);
             if(loan.getLoanState() == LoanState.BORROWED){
                 repository.recordBorrow(loan);

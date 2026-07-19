@@ -1,4 +1,4 @@
-package io.github.ethan23.pickaxeLoans;
+package io.github.ethan23.pickaxeLoans.service;
 
 import io.github.ethan23.pickaxeLoans.model.Loan;
 

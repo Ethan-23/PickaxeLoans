@@ -1,7 +1,7 @@
 package io.github.ethan23.pickaxeLoans.events;
 
-import io.github.ethan23.pickaxeLoans.LoanService;
-import io.github.ethan23.pickaxeLoans.PickaxeChecker;
+import io.github.ethan23.pickaxeLoans.service.LoanService;
+import io.github.ethan23.pickaxeLoans.item.PickaxeChecker;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

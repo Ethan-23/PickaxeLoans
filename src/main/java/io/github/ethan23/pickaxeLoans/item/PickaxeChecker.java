@@ -1,7 +1,8 @@
-package io.github.ethan23.pickaxeLoans;
+package io.github.ethan23.pickaxeLoans.item;
 
 import io.github.ethan23.pickaxeLoans.cosmic.PickaxeType;
 import io.github.ethan23.pickaxeLoans.model.Loan;
+import io.github.ethan23.pickaxeLoans.service.LoanService;
 import io.github.ethan23.pickaxeLoans.util.ComponentBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
