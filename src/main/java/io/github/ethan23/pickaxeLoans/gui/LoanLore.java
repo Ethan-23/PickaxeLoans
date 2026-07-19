@@ -71,12 +71,12 @@ public final class LoanLore {
     }
 
     public LoanLore xpTaxResult() {
-        lines.add(ComponentBuilder.parse("<gold>Xp Tax: <yellow>" + deal.getXpTaxPercent() + "%" + " (" + NumberConversions.formattedNumberDisplay(loan.getActiveLoan().getXpTax()) + ")"));
+        lines.add(ComponentBuilder.parse("<gold>Xp Tax: <yellow>" + deal.getXpTaxPercent() + "%" + " (" + NumberConversions.formattedNumberDisplay(loan.getActiveLoan().getXpAccrued()) + ")"));
         return this;
     }
 
     public LoanLore energyTaxResult() {
-        lines.add(ComponentBuilder.parse("<gold>Energy Tax: <yellow>" + deal.getEnergyTaxPercent() + "%" + " (" + NumberConversions.formattedNumberDisplay(loan.getActiveLoan().getEnergyTax()) + ")"));
+        lines.add(ComponentBuilder.parse("<gold>Energy Tax: <yellow>" + deal.getEnergyTaxPercent() + "%" + " (" + NumberConversions.formattedNumberDisplay(loan.getActiveLoan().getEnergyAccrued()) + ")"));
         return this;
     }
 

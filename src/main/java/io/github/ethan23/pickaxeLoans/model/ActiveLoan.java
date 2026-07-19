@@ -1,34 +1,52 @@
 package io.github.ethan23.pickaxeLoans.model;
 
+import io.github.ethan23.pickaxeLoans.database.LoanRecord;
+
 import java.math.BigDecimal;
 import java.util.UUID;
 
 public class ActiveLoan {
 
-    UUID borrowerUUID;
-    BigDecimal xpTax;
-    BigDecimal energyTax;
-    long startedAt;
-    long endsAt;
+    private final UUID borrowerUUID;
+    private BigDecimal xpAccrued;
+    private BigDecimal energyAccrued;
+    private final long startedAt;
+    private final long endsAt;
+
+    private ActiveLoan(UUID borrowerUUID, BigDecimal xpAccrued, BigDecimal energyAccrued, long startedAt, long endsAt) {
+        this.borrowerUUID = borrowerUUID;
+        this.xpAccrued = xpAccrued;
+        this.energyAccrued = energyAccrued;
+        this.startedAt = startedAt;
+        this.endsAt = endsAt;
+    }
 
     public ActiveLoan(UUID borrowerUUID, long loanDurationMillis) {
         this.borrowerUUID = borrowerUUID;
-        this.xpTax = BigDecimal.valueOf(0);
-        this.energyTax = BigDecimal.valueOf(0);
+        this.xpAccrued = BigDecimal.ZERO;
+        this.energyAccrued = BigDecimal.ZERO;
         this.startedAt = System.currentTimeMillis();
         this.endsAt = this.startedAt + loanDurationMillis;
+    }
+
+    public void accruedXp(BigDecimal amount){
+        this.xpAccrued = this.xpAccrued.add(amount);
+    }
+
+    public void accruedEnergy(BigDecimal amount){
+        this.energyAccrued = this.energyAccrued.add(amount);
     }
 
     public UUID getBorrowerUUID() {
         return borrowerUUID;
     }
 
-    public BigDecimal getXpTax() {
-        return xpTax;
+    public BigDecimal getXpAccrued() {
+        return xpAccrued;
     }
 
-    public BigDecimal getEnergyTax() {
-        return energyTax;
+    public BigDecimal getEnergyAccrued() {
+        return energyAccrued;
     }
 
     public long getStartedAt() {
@@ -37,5 +55,9 @@ public class ActiveLoan {
 
     public long getEndsAt() {
         return endsAt;
+    }
+
+    public static ActiveLoan fromRecord(LoanRecord.ActiveLoanRecord activeLoanRecord){
+        return new ActiveLoan(activeLoanRecord.borrowerUUID(), activeLoanRecord.xpAccrued(), activeLoanRecord.energyAccrued(), activeLoanRecord.startedAt(), activeLoanRecord.endsAt());
     }
 }
