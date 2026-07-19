@@ -12,6 +12,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -29,8 +30,8 @@ public class LoanListingMenu extends InventoryGUI {
     private static final int NEXT_PAGE_SLOT = 50;
     private static final int GUIDE_SLOT = 53;
 
-    private CosmicPlayerService cosmicPlayerService;
-    private PlayerInputListener playerInputListener;
+    private final CosmicPlayerService cosmicPlayerService;
+    private final PlayerInputListener playerInputListener;
     private int page;
     private final Player player;
     private final UUID playerUUID;
@@ -149,9 +150,15 @@ public class LoanListingMenu extends InventoryGUI {
 
         ItemStack clickedItem = event.getCurrentItem();
 
-        if(PickaxeChecker.checkLoanCreateRequirements(clickedItem)){
+        if(PickaxeChecker.checkLoanCreateRequirements(player, clickedItem)){
             player.openInventory(new LoanCreateMenu(playerInputListener, loanService, player, clickedItem, event.getSlot()).getInventory());
         }
+    }
+
+    @Override
+    public void onOpen(InventoryOpenEvent event) {
+        super.onOpen(event);
+        reloadPage();
     }
 
     private void reloadPage(){

@@ -15,10 +15,16 @@ import java.util.UUID;
 
 public class PickaxeChecker {
 
-    public static boolean checkLoanCreateRequirements(ItemStack itemStack){
+    public static boolean checkLoanCreateRequirements(Player player, ItemStack itemStack){
         //Whitescroll Check
-        return itemStack != null && PickaxeType.isPickaxeType(itemStack.getType()) && !itemStack.getItemMeta().getPersistentDataContainer().has(LoanKeys.loanKey, PersistentDataType.STRING);
+        boolean canLoan = itemStack != null && PickaxeType.isPickaxeType(itemStack.getType()) && !itemStack.getItemMeta().getPersistentDataContainer().has(LoanKeys.loanKey, PersistentDataType.STRING);
 
+        if(!canLoan){
+            player.sendMessage(ColorTextBuilder.parse("<red>You cannot loan this item!"));
+
+        }
+
+        return canLoan;
     }
 
     public static boolean isLoanItem(ItemStack itemStack){

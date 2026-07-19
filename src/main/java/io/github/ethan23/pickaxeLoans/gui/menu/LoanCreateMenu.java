@@ -203,12 +203,17 @@ public class LoanCreateMenu extends InventoryGUI {
 
         ItemStack clickedItem = event.getCurrentItem();
 
-        if(PickaxeChecker.checkLoanCreateRequirements(clickedItem)){
-            this.pickaxeItem = clickedItem.clone();
-            this.pickaxeSlot = event.getSlot();
-            renderClickable();
-            player.updateInventory();
+        if(clickedItem == null){
+            return;
         }
+
+        if(!PickaxeChecker.checkLoanCreateRequirements(player, clickedItem)){
+            return;
+        }
+        this.pickaxeItem = clickedItem.clone();
+        this.pickaxeSlot = event.getSlot();
+        renderClickable();
+        player.updateInventory();
     }
 
     @Override
