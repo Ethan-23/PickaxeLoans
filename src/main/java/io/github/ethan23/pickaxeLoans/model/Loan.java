@@ -17,7 +17,7 @@ public class Loan {
     private LoanState loanState;
     private ActiveLoan activeLoan;
 
-    private final static long EXPIRATION_TIME = 3_600_000;
+    private final static long EXPIRATION_TIME = 1000 * 60 * 60;
 
     public Loan(ItemStack pickaxe, UUID lenderUUID, LoanDeal loanDeal) {
         this.loanUUID = UUID.randomUUID();
