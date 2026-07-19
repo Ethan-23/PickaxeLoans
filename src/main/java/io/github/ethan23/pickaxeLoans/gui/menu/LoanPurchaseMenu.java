@@ -45,6 +45,13 @@ public class LoanPurchaseMenu extends InventoryGUI {
                     return;
                 }
 
+                BigDecimal cost = BigDecimal.valueOf(loan.getLoanDeal().getUpfrontCost());
+
+                if(loan.getLoanDeal().getCostType() == CostType.ENERGY && cosmicPlayerService.getEnergy(playerUUID).compareTo(cost) < 0){
+                    player.sendMessage(ColorTextBuilder.parse("<red>You do not have enough energy to borrow this pickaxe!"));
+                    return;
+                }
+
                 LoanResult loanResult = loanService.borrow(playerUUID, loan.getLoanUUID());
                 switch (loanResult){
                     case LENDERS_LOAN -> {
@@ -64,7 +71,7 @@ public class LoanPurchaseMenu extends InventoryGUI {
                         player.openInventory(prevInventory);
                     }
                     case SUCCESS ->{
-                        chargePlayer(player, loan);
+                        chargePlayer(player, loan, cost);
                         player.sendMessage(parse("<yellow>You have accepted the loan from " + Bukkit.getOfflinePlayer(loan.getLenderUUID()).getName()));
                         player.getInventory().addItem(loan.getLoanPickaxe());
                         player.closeInventory();
@@ -95,16 +102,11 @@ public class LoanPurchaseMenu extends InventoryGUI {
         ));
     }
 
-    private void chargePlayer(Player player, Loan loan) {
+    private void chargePlayer(Player player, Loan loan, BigDecimal cost) {
         UUID playerUUID = player.getUniqueId();
         CostType costType = loan.getLoanDeal().getCostType();
-        BigDecimal cost = BigDecimal.valueOf(loan.getLoanDeal().getUpfrontCost());
 
         if(costType == CostType.ENERGY){
-            if(cosmicPlayerService.getEnergy(playerUUID).compareTo(cost) < 0){
-                player.sendMessage(ColorTextBuilder.parse("<red>You do not have enough energy to borrow this pickaxe!"));
-                return;
-            }
             cosmicPlayerService.removeEnergy(playerUUID, cost);
         } else {
             //Money check would go here if I implemented an economy :)
