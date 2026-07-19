@@ -1,5 +1,6 @@
 package io.github.ethan23.pickaxeLoans.commands;
 
+import io.github.ethan23.pickaxeLoans.cosmic.service.CosmicPlayerService;
 import io.github.ethan23.pickaxeLoans.service.LoanService;
 import io.github.ethan23.pickaxeLoans.gui.PlayerInputListener;
 import io.github.ethan23.pickaxeLoans.gui.menu.LoanCreateMenu;
@@ -18,9 +19,11 @@ public class LoanCommand implements CommandExecutor {
 
     private final LoanService loanService;
     private final PlayerInputListener playerInputListener;
+    private final CosmicPlayerService cosmicPlayerService;
 
-    public LoanCommand(LoanService loanService, PlayerInputListener playerInputListener) {
+    public LoanCommand(LoanService loanService, PlayerInputListener playerInputListener, CosmicPlayerService cosmicPlayerService) {
         this.playerInputListener = playerInputListener;
+        this.cosmicPlayerService = cosmicPlayerService;
         this.loanService = loanService;
     }
 
@@ -33,7 +36,7 @@ public class LoanCommand implements CommandExecutor {
 
         if(args.length == 0){
             player.sendMessage(ComponentBuilder.parse("<yellow>Opening Loan Listings"));
-            player.openInventory(new LoanListingMenu(player, loanService, playerInputListener).getInventory());
+            player.openInventory(new LoanListingMenu(player, loanService, playerInputListener, cosmicPlayerService).getInventory());
             return true;
         }
 

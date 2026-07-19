@@ -1,4 +1,4 @@
-package io.github.ethan23.pickaxeLoans.cosmic;
+package io.github.ethan23.pickaxeLoans.cosmic.model;
 
 import org.bukkit.Material;
 

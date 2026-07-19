@@ -1,5 +1,6 @@
 package io.github.ethan23.pickaxeLoans.gui.menu;
 
+import io.github.ethan23.pickaxeLoans.cosmic.service.CosmicPlayerService;
 import io.github.ethan23.pickaxeLoans.service.LoanService;
 import io.github.ethan23.pickaxeLoans.gui.Buttons;
 import io.github.ethan23.pickaxeLoans.gui.InventoryButton;
@@ -11,6 +12,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+
+import java.math.BigDecimal;
+import java.util.UUID;
 
 import static io.github.ethan23.pickaxeLoans.util.ComponentBuilder.parse;
 
@@ -25,11 +29,13 @@ public class ActiveLoansMenu extends InventoryGUI {
     private final Inventory prevInventory;
     private final Player player;
     private final LoanService loanService;
+    private final CosmicPlayerService cosmicPlayerService;
 
-    public ActiveLoansMenu(Inventory prevInventory, Player player, LoanService loanService) {
+    public ActiveLoansMenu(Inventory prevInventory, Player player, LoanService loanService, CosmicPlayerService cosmicPlayerService) {
         super(INVENTORY_SIZE, INVENTORY_TITLE);
         this.prevInventory = prevInventory;
         this.loanService = loanService;
+        this.cosmicPlayerService = cosmicPlayerService;
         this.player = player;
 
         addButton(BACK_SLOT, new InventoryButton(ItemBuilder.of(Material.CHEST, "<bold><yellow>Back to loans"), e -> {
@@ -78,8 +84,17 @@ public class ActiveLoansMenu extends InventoryGUI {
                     reloadPage();
                     player.getInventory().addItem(loan.getPickaxe());
                     player.sendMessage(parse("<yellow>You have claimed your returned loan and fees."));
-                    player.sendMessage(parse("+ " + loan.getActiveLoan().getEnergyAccrued() + " Cosmic Energy"));
-                    player.sendMessage(parse("+ " + loan.getActiveLoan().getXpAccrued() + " Experience"));
+
+                    BigDecimal totalEnergyAccrued = loan.getActiveLoan().getEnergyAccrued();
+                    BigDecimal totalExperienceAccrued = loan.getActiveLoan().getXpAccrued();
+
+                    UUID playerUUID = player.getUniqueId();
+
+                    cosmicPlayerService.addEnergy(playerUUID, totalEnergyAccrued);
+                    cosmicPlayerService.addExperience(playerUUID, totalExperienceAccrued);
+
+                    player.sendMessage(parse("+ " + totalEnergyAccrued + " Cosmic Energy"));
+                    player.sendMessage(parse("+ " + totalExperienceAccrued + " Experience"));
                 }));
             } else if (loan.getLoanState() == LoanState.CANCELLED || loan.getLoanState() == LoanState.EXPIRED) {
                 addButton(i, Buttons.expiredLoanListed(loan, () -> {
