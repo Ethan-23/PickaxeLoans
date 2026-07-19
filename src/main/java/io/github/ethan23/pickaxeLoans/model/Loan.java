@@ -98,11 +98,4 @@ public class Loan {
         return loanPickaxe;
     }
 
-    public void setActiveLoan(ActiveLoan activeLoan) {
-        this.activeLoan = activeLoan;
-    }
-
-    public void setLoanState(LoanState loanState) {
-        this.loanState = loanState;
-    }
 }
