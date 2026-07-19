@@ -21,6 +21,16 @@ public class ItemBuilder {
     private static final int MAX_LORE_CHAR = 30;
     private static final MiniMessage MM = MiniMessage.miniMessage();
 
+    /**
+     * Creates an ItemStack with the input parameters
+     *
+     * <p>Lore will be automatically spaced to {@value #MAX_LORE_CHAR} per line</p>
+     *
+     * @param material material to set
+     * @param name name to set
+     * @param loreString lore to set
+     * @return ItemStack with listed parameters.
+     */
     public static ItemStack of(Material material, String name, String... loreString) {
         ItemStack item = new ItemStack(material);
         item.editMeta(meta -> {
@@ -33,6 +43,12 @@ public class ItemBuilder {
         return item;
     }
 
+    /**
+     * Breaks down the lore lines with a maximum of {@value #MAX_LORE_CHAR} characters long before pushing to the next line.
+     *
+     * @param meta ItemStacks meta
+     * @param loreString String lore you want to break down
+     */
     private static void breakDownLore(ItemMeta meta, String[] loreString){
         List<Component> lore = new ArrayList<>();
 

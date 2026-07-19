@@ -11,6 +11,12 @@ public class NumberConversions {
     private static List<Double> balanceAmounts = List.of(1000000000000.0, 1000000000.0, 1000000.0, 1000.0);
     private static List<String> balanceSuffix = List.of("t", "b", "m", "k");
 
+    /**
+     * Converts Milliseconds to standard time format
+     *
+     * @param millis Milliseconds to be converted
+     * @return String of HH MM SS format of time
+     */
     public static String timeFromMillis(long millis) {
         long hours = TimeUnit.MILLISECONDS.toHours(millis);
         long minutes = TimeUnit.MILLISECONDS.toMinutes(millis) % 60;
@@ -39,6 +45,14 @@ public class NumberConversions {
         return balanceSuffix.contains(suffix);
     }
 
+    /**
+     * Converts chat message suffix values to full numbers
+     *
+     * <p>Example 1k -> 1000</p>
+     *
+     * @param amount String suffix value
+     * @return double of suffix number
+     */
     public static double suffixToNumber(String amount) {
         String suffix = amount.substring(amount.length() - 1);
         double number;
@@ -51,10 +65,22 @@ public class NumberConversions {
         return balanceAmounts.get(balanceSuffix.indexOf(suffix)) * number;
     }
 
+    /**
+     * Adds commas to make longer numbers easier to read.
+     *
+     * @param value value to convert
+     * @return String number with commas
+     */
     public static String formattedNumberDisplay(BigDecimal value){
         return new DecimalFormat("#,###.##").format(value);
     }
 
+    /**
+     * Adds commas to make longer numbers easier to read.
+     *
+     * @param value value to convert
+     * @return String number with commas
+     */
     public static String formattedNumberDisplay(Double value){
         return new DecimalFormat("#,###.##").format(value);
     }
