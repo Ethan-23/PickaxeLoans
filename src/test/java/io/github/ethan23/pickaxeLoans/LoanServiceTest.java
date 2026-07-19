@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -207,6 +208,41 @@ public class LoanServiceTest {
         assertTrue(result.contains(a));
         assertTrue(result.contains(b));
         assertFalse(result.contains(other));
+    }
+
+    private Loan newInstantlyOverdueLoan(UUID lenderUUID) {
+        LoanDeal deal = new LoanDeal();
+        deal.setLoanDurationMillis(0);
+        return new Loan(null, lenderUUID, deal);
+    }
+
+    @Test
+    void checkEndsAtHeap_overdueLoan_returnsBorrower() {
+        LoanService service = newService();
+        UUID borrower = UUID.randomUUID();
+        Loan loan = newInstantlyOverdueLoan(UUID.randomUUID());
+        service.createListing(loan);
+        service.borrow(borrower, loan.getLoanUUID());
+
+        Set<UUID> removedBorrowers = service.checkEndsAtHeap();
+
+        assertTrue(removedBorrowers.contains(borrower));
+        assertEquals(LoanState.RETURNED, loan.getLoanState());
+        assertNull(service.getBorrowersLoan(borrower));
+    }
+
+    @Test
+    void checkEndsAtHeap_afterEarlyReturn_reportsNoBorrowers() {
+        LoanService service = newService();
+        UUID borrower = UUID.randomUUID();
+        Loan loan = newInstantlyOverdueLoan(UUID.randomUUID());
+        service.createListing(loan);
+        service.borrow(borrower, loan.getLoanUUID());
+        service.returnLoan(loan.getLoanUUID());
+
+        Set<UUID> removedBorrowers = service.checkEndsAtHeap();
+
+        assertTrue(removedBorrowers.isEmpty());
     }
 
     @Test

@@ -171,8 +171,13 @@ public class LoanService {
             if (loan == null || loan.getActiveLoan().getEndsAt() > System.currentTimeMillis()) {
                 break;
             }
-            returnLoan(loan.getLoanUUID());
             repository.removeTopEndAt();
+
+            if (loan.getLoanState() != LoanState.BORROWED) {
+                continue;
+            }
+
+            returnLoan(loan.getLoanUUID());
             removedBorrowers.add(loan.getActiveLoan().getBorrowerUUID());
         }
 
