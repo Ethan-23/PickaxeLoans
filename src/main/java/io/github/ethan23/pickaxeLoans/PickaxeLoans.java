@@ -15,6 +15,7 @@ import java.util.Objects;
 public final class PickaxeLoans extends JavaPlugin {
 
     private static PickaxeLoans instance;
+    private LoanUpdateTick loanUpdateTick;
 
     @Override
     public void onEnable() {
@@ -34,6 +35,9 @@ public final class PickaxeLoans extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("loan")).setExecutor(new LoanCommand(loanService, playerInputListener));
         Objects.requireNonNull(this.getCommand("loan")).setTabCompleter(new LoanCommandTabComplete());
 
+        //Update
+        this.loanUpdateTick = new LoanUpdateTick(loanService);
+        loanUpdateTick.startTickUpdate(this);
 
     }
 
@@ -43,6 +47,6 @@ public final class PickaxeLoans extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        loanUpdateTick.cancelRepeatingTask();
     }
 }

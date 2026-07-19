@@ -22,7 +22,7 @@ public class PlayerJoinListener implements Listener {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 
-        PickaxeChecker.removeLoan(player.getInventory(), loanService, uuid);
+        PickaxeChecker.removeLoan(loanService, uuid);
 
     }
 

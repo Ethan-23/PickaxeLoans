@@ -46,40 +46,32 @@ public class ActiveLoansMenu extends InventoryGUI {
     private void loadLoanList() {
 
         int i = 0;
-        for(Loan loan : loanService.getLenderLoans(player.getUniqueId()).reversed()){
+        for (Loan loan : loanService.getLenderLoans(player.getUniqueId()).reversed()) {
 
-            if(List.of(LoanState.LISTED, LoanState.CANCELLED, LoanState.EXPIRED).contains(loan.getLoanState())){
-                addButton(i, Buttons.activeLoanListed(loan,
-                        () -> {
-                            if(loan.getLoanState() == LoanState.LISTED){
-                                LoanResult result = loanService.cancel(loan.getLoanUUID());
-                                switch (result) {
-                                    case SUCCESS   -> {
-                                        reloadPage();
-                                        player.sendMessage(parse("<yellow>Loan listing has been canceled."));
-                                    }
-                                    case NOT_LISTED-> {
-                                        player.sendMessage(parse("<red>That loan is no longer listed!"));
-                                    }
-                                    case NOT_FOUND -> {
-                                        reloadPage();
-                                    }
-                                    default -> {}
-                                }
-                            } else if(loan.getLoanState() == LoanState.CANCELLED || loan.getLoanState() == LoanState.EXPIRED){
-
-                                player.getInventory().addItem(loan.getPickaxe());
-                                loanService.deleteLoan(loan);
-                                reloadPage();
-                                player.sendMessage(parse("<yellow>Loan listing has been removed."));
-                            }
-                        }));
-            }else if(loan.getLoanState() == LoanState.BORROWED){
-                addButton(i, Buttons.activeLoanBorrowed(loan, ()->{}));
-            }else if(loan.getLoanState() == LoanState.RETURNED){
-                addButton(i, Buttons.activeLoanReturned(loan, ()->{
-
-                    if(player.getInventory().firstEmpty() == -1){
+            if (loan.getLoanState() == LoanState.LISTED) {
+                addButton(i, Buttons.activeLoanListed(loan, () -> {
+                    LoanResult result = loanService.cancel(loan.getLoanUUID());
+                    switch (result) {
+                        case SUCCESS -> {
+                            reloadPage();
+                            player.sendMessage(parse("<yellow>Loan listing has been canceled."));
+                        }
+                        case NOT_LISTED -> {
+                            player.sendMessage(parse("<red>That loan is no longer listed!"));
+                        }
+                        case NOT_FOUND -> {
+                            reloadPage();
+                        }
+                        default -> {
+                        }
+                    }
+                }));
+            } else if (loan.getLoanState() == LoanState.BORROWED) {
+                addButton(i, Buttons.activeLoanBorrowed(loan, () -> {
+                }));
+            } else if (loan.getLoanState() == LoanState.RETURNED) {
+                addButton(i, Buttons.activeLoanReturned(loan, () -> {
+                    if (player.getInventory().firstEmpty() == -1) {
                         player.sendMessage(parse("<red>You do not have enough inventory space!"));
                         return;
                     }
@@ -91,22 +83,30 @@ public class ActiveLoansMenu extends InventoryGUI {
                     player.sendMessage(parse("+ " + loan.getActiveLoan().getEnergyTax() + " Cosmic Energy"));
                     player.sendMessage(parse("+ " + loan.getActiveLoan().getXpTax() + " Experience"));
                 }));
+            } else if (loan.getLoanState() == LoanState.CANCELLED || loan.getLoanState() == LoanState.EXPIRED) {
+                addButton(i, Buttons.expiredLoanListed(loan, () -> {
+                    if (loan.getLoanState() == LoanState.CANCELLED || loan.getLoanState() == LoanState.EXPIRED) {
+
+                        player.getInventory().addItem(loan.getPickaxe());
+                        loanService.deleteLoan(loan);
+                        reloadPage();
+                        player.sendMessage(parse("<yellow>Loan listing has been claimed."));
+                    }
+                }));
             }
-
-
             i++;
         }
 
     }
 
-    private void clearLoanList(){
-        for(int i = 0; i < LOAN_SLOTS; i++){
+    private void clearLoanList() {
+        for (int i = 0; i < LOAN_SLOTS; i++) {
             getInventory().setItem(i, new ItemStack(Material.AIR));
             removeButton(i);
         }
     }
 
-    private void reloadPage(){
+    private void reloadPage() {
         clearLoanList();
         loadLoanList();
         decorate();

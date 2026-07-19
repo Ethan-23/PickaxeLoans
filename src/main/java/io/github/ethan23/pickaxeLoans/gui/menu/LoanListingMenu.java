@@ -85,7 +85,7 @@ public class LoanListingMenu extends InventoryGUI {
 
             player.sendMessage(ComponentBuilder.parse("<yellow>You have returned your loan."));
             loanService.returnLoan(loan.getLoanUUID());
-            PickaxeChecker.removeLoan(player.getInventory(), loanService, this.playerUUID);
+            PickaxeChecker.removeLoan(loanService, this.playerUUID);
             buildCurrentLoanAgreementButton();
             decorate();
         }));

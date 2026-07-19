@@ -55,6 +55,24 @@ public final class Buttons {
         );
     }
 
+    public static InventoryButton expiredLoanListed(Loan loan, Runnable action) {
+        return new InventoryButton(
+                LoanLore.of(loan)
+                        .divider()
+                        .state()
+                        .price()
+                        .loanTime()
+                        .xpTax()
+                        .energyTax()
+                        .divider()
+                        .blank()
+                        .exit()
+                        .applyTo(loan.getPickaxe()), event -> {
+            action.run();
+        }
+        );
+    }
+
     public static InventoryButton activeLoanBorrowed(Loan loan, Runnable action) {
         return new InventoryButton(
                 LoanLore.of(loan)
@@ -101,10 +119,9 @@ public final class Buttons {
                         .energyTaxResult()
                         .divider()
                         .applyTo(loan.getPickaxe()), event -> {
-                    action.run();
+            action.run();
         });
     }
-
 
 
 }
