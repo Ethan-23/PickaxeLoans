@@ -12,8 +12,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
-
 import static io.github.ethan23.pickaxeLoans.util.ComponentBuilder.parse;
 
 public class ActiveLoansMenu extends InventoryGUI {
@@ -80,8 +78,8 @@ public class ActiveLoansMenu extends InventoryGUI {
                     reloadPage();
                     player.getInventory().addItem(loan.getPickaxe());
                     player.sendMessage(parse("<yellow>You have claimed your returned loan and fees."));
-                    player.sendMessage(parse("+ " + loan.getActiveLoan().getEnergyTax() + " Cosmic Energy"));
-                    player.sendMessage(parse("+ " + loan.getActiveLoan().getXpTax() + " Experience"));
+                    player.sendMessage(parse("+ " + loan.getActiveLoan().getEnergyAccrued() + " Cosmic Energy"));
+                    player.sendMessage(parse("+ " + loan.getActiveLoan().getXpAccrued() + " Experience"));
                 }));
             } else if (loan.getLoanState() == LoanState.CANCELLED || loan.getLoanState() == LoanState.EXPIRED) {
                 addButton(i, Buttons.expiredLoanListed(loan, () -> {

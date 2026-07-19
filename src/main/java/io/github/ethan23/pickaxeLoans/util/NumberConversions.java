@@ -51,7 +51,11 @@ public class NumberConversions {
         return balanceAmounts.get(balanceSuffix.indexOf(suffix)) * number;
     }
 
-    public static String formattedNumberDisplay(double value){
+    public static String formattedNumberDisplay(BigDecimal value){
+        return new DecimalFormat("#,###.##").format(value);
+    }
+
+    public static String formattedNumberDisplay(Double value){
         return new DecimalFormat("#,###.##").format(value);
     }
 

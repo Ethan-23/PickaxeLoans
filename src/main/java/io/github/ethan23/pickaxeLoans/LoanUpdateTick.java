@@ -17,14 +17,14 @@ public class LoanUpdateTick {
         this.loanService = loanService;
     }
 
-    public void startTickUpdate(Plugin plugin){
+    public void init(Plugin plugin){
         this.taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
             loanService.checkExpirationHeap();
             handleEndsAtInventories(loanService.checkEndsAtHeap());
         }, 0, TICK_UPDATE_AMOUNT);
     }
 
-    public void cancelRepeatingTask(){
+    public void cancel(){
         if(taskID != null){
             Bukkit.getScheduler().cancelTask(taskID);
         }

@@ -1,6 +1,7 @@
 package io.github.ethan23.pickaxeLoans.model;
 
 import io.github.ethan23.pickaxeLoans.LoanKeys;
+import io.github.ethan23.pickaxeLoans.database.LoanRecord;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -18,6 +19,17 @@ public class Loan {
     private ActiveLoan activeLoan;
 
     private final static long EXPIRATION_TIME = 1000 * 60 * 60;
+
+    private Loan(ActiveLoan activeLoan, LoanState loanState, long createdAt, long listingExpiresAt, LoanDeal loanDeal, UUID lenderUUID, ItemStack pickaxe, UUID loanUUID) {
+        this.activeLoan = activeLoan;
+        this.loanState = loanState;
+        this.listingExpiresAt = listingExpiresAt;
+        this.createdAt = createdAt;
+        this.loanDeal = loanDeal;
+        this.lenderUUID = lenderUUID;
+        this.pickaxe = pickaxe;
+        this.loanUUID = loanUUID;
+    }
 
     public Loan(ItemStack pickaxe, UUID lenderUUID, LoanDeal loanDeal) {
         this.loanUUID = UUID.randomUUID();
@@ -90,12 +102,35 @@ public class Loan {
         return activeLoan;
     }
 
-    public ItemStack getLoanPickaxe(){
+    public ItemStack getLoanPickaxe() {
         ItemStack loanPickaxe = pickaxe.clone();
         ItemMeta pickaxeMeta = loanPickaxe.getItemMeta();
         pickaxeMeta.getPersistentDataContainer().set(LoanKeys.loanKey, PersistentDataType.STRING, this.loanUUID.toString());
         loanPickaxe.setItemMeta(pickaxeMeta);
         return loanPickaxe;
+    }
+
+    public LoanRecord toRecord() {
+
+        LoanRecord.ActiveLoanRecord activeLoanRecord = null;
+
+        if (activeLoan != null) {
+            activeLoanRecord = new LoanRecord.ActiveLoanRecord(this.activeLoan.getBorrowerUUID(), this.activeLoan.getXpAccrued(), this.activeLoan.getEnergyAccrued(),
+                    this.activeLoan.getStartedAt(), this.activeLoan.getEndsAt());
+        }
+
+        return new LoanRecord(this.loanUUID, this.pickaxe.serializeAsBytes(), this.lenderUUID, this.loanDeal.getCostType(),
+                this.loanDeal.getUpfrontCost(), this.loanDeal.getXpTaxPercent(), this.loanDeal.getEnergyTaxPercent(),
+                this.loanDeal.getLoanDurationMillis(), this.createdAt, this.listingExpiresAt, this.loanState, activeLoanRecord);
+    }
+
+    public static Loan fromRecord(LoanRecord record) {
+
+        ActiveLoan activeLoan = record.activeLoanRecord() == null
+                ? null
+                : ActiveLoan.fromRecord(record.activeLoanRecord());
+
+        return new Loan(activeLoan, record.loanState(), record.createdAt(), record.listingExpiresAt(), new LoanDeal(record.costType(), record.upFrontCost(), record.xpTaxPercent(), record.energyTaxPercent(), record.loanDurationMillis()), record.lenderUUID(), ItemStack.deserializeBytes(record.pickaxe()), record.loanUUID());
     }
 
 }
