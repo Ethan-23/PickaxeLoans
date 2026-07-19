@@ -1,19 +1,20 @@
 package io.github.ethan23.pickaxeLoans.model;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public class ActiveLoan {
 
     UUID borrowerUUID;
-    float xpTax;
-    float energyTax;
+    BigDecimal xpTax;
+    BigDecimal energyTax;
     long startedAt;
     long endsAt;
 
     public ActiveLoan(UUID borrowerUUID, long loanDurationMillis) {
         this.borrowerUUID = borrowerUUID;
-        this.xpTax = 0;
-        this.energyTax = 0;
+        this.xpTax = BigDecimal.valueOf(0);
+        this.energyTax = BigDecimal.valueOf(0);
         this.startedAt = System.currentTimeMillis();
         this.endsAt = this.startedAt + loanDurationMillis;
     }
@@ -22,11 +23,11 @@ public class ActiveLoan {
         return borrowerUUID;
     }
 
-    public float getXpTax() {
+    public BigDecimal getXpTax() {
         return xpTax;
     }
 
-    public float getEnergyTax() {
+    public BigDecimal getEnergyTax() {
         return energyTax;
     }
 
