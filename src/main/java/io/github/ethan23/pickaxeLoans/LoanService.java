@@ -5,10 +5,7 @@ import io.github.ethan23.pickaxeLoans.model.Loan;
 import io.github.ethan23.pickaxeLoans.model.LoanResult;
 import io.github.ethan23.pickaxeLoans.model.LoanState;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class LoanService {
 
@@ -55,6 +52,15 @@ public class LoanService {
 
         loan.markBorrowed(new ActiveLoan(borrowerUUID, loan.getLoanDeal().getLoanDurationMillis()));
         repository.recordBorrow(loan);
+        return LoanResult.SUCCESS;
+    }
+
+    public LoanResult exprire(Loan loan){
+
+        if(loan.getLoanState() != LoanState.LISTED){
+            return LoanResult.NOT_LISTED;
+        }
+        loan.expire();
         return LoanResult.SUCCESS;
     }
 
@@ -122,5 +128,34 @@ public class LoanService {
 
     public boolean isBorrower(UUID uuid) {
         return repository.isBorrowing(uuid);
+    }
+
+    public void checkExpirationHeap(){
+
+        while(true){
+            Loan loan = repository.peekNextExpiration();
+            if (loan == null || loan.getActiveLoan() == null || loan.getActiveLoan().getEndsAt() > System.currentTimeMillis()) {
+                break;
+            }
+            exprire(repository.peekNextExpiration());
+            repository.removeTopExpiration();
+        }
+    }
+
+    public Set<UUID> checkEndsAtHeap(){
+
+        Set<UUID> removedBorrowers = new HashSet<>();
+
+        while (true) {
+            Loan loan = repository.peekNextEndAt();
+            if (loan == null || loan.getActiveLoan().getEndsAt() > System.currentTimeMillis()) {
+                break;
+            }
+            returnLoan(loan.getLoanUUID());
+            repository.removeTopEndAt();
+            removedBorrowers.add(loan.getActiveLoan().getBorrowerUUID());
+        }
+
+        return removedBorrowers;
     }
 }
