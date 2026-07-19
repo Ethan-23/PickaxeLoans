@@ -21,6 +21,18 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.Objects;
 import java.util.logging.Level;
 
+/**
+ * Plugin entry point; wires storage, services, listeners, commands, and
+ * repeating tasks.
+ *
+ * <p>Startup order matters: storage is opened and loans are loaded into the
+ * repository before the cosmic module, listeners, or tasks can observe them.
+ * If the database cannot be opened, the plugin disables itself rather than
+ * run without persistence.
+ *
+ * <p>Shutdown order matters more: tasks are canceled and dirty loans are
+ * flushed before the storage connection closes.
+ */
 public final class PickaxeLoans extends JavaPlugin {
 
     private static PickaxeLoans instance;
@@ -73,6 +85,12 @@ public final class PickaxeLoans extends JavaPlugin {
 
     }
 
+    /**
+     * Global plugin accessor, used only where constructor injection is not
+     * practical (e.g. scheduling tasks from event callbacks).
+     *
+     * @return the running plugin instance
+     */
     public static PickaxeLoans getPlugin(){
         return instance;
     }

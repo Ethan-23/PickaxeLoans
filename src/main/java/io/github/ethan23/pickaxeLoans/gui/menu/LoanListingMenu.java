@@ -68,7 +68,15 @@ public class LoanListingMenu extends InventoryGUI {
                 reloadPage();
             }
         }));
-        addButton(GUIDE_SLOT, Buttons.guide());
+        addButton(GUIDE_SLOT, Buttons.guide(
+                "<gray>Welcome to the <yellow>Loan Market<gray>! Every pickaxe shown here can be borrowed for a set time.",
+                "",
+                "<gray>Hover a pickaxe to see its full deal: the <yellow>upfront cost <gray>you pay once, and the <yellow>taxes <gray>the lender takes from the XP and energy you mine while using it.",
+                "",
+                "<gray>You can only borrow one pickaxe at a time. A borrowed pickaxe cannot be dropped or stored, and it returns to its lender when the timer ends or you die.",
+                "",
+                "<gray>Want to lend instead? Click a pickaxe in your own inventory to list it."
+        ));
 
         loadLoanList();
 

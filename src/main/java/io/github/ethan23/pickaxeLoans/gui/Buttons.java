@@ -10,8 +10,8 @@ public final class Buttons {
 
     }
 
-    public static InventoryButton guide() {
-        return new InventoryButton(ItemBuilder.of(Material.BOOK, "<bold><yellow>Guide"), event -> {
+    public static InventoryButton guide(String... guide) {
+        return new InventoryButton(ItemBuilder.of(Material.BOOK, "<bold><yellow>Guide", guide), event -> {
         });
     }
 

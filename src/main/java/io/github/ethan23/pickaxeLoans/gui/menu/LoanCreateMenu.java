@@ -60,7 +60,17 @@ public class LoanCreateMenu extends InventoryGUI {
 
 
 
-        addButton(GUIDE_SLOT, Buttons.guide());
+        addButton(GUIDE_SLOT, Buttons.guide(
+                "<gray>Set the terms of your loan here, then press <green>Confirm <gray>to put your pickaxe on the market.",
+                "",
+                "<yellow>Cost <gray>is the one-time price a borrower pays up front. Right-Click it to switch between money and energy.",
+                "",
+                "<yellow>Loan Time <gray>is how long the borrower keeps your pickaxe before it returns to you automatically.",
+                "",
+                "<yellow>Taxes <gray>are your ongoing payout: the percent of the XP and energy the borrower earns with your pickaxe that goes to you instead.",
+                "",
+                "<gray>Clicking a value closes this menu and asks for the new amount in chat. Numbers like <yellow>10k <gray>and <yellow>1m <gray>work, or type <red>cancel <gray>to come back."
+        ));
 
         renderClickable();
     }

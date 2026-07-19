@@ -18,7 +18,7 @@ public class ItemBuilder {
     private ItemBuilder() {}
 
     protected static final Pattern COLOR_TAG = Pattern.compile("<(#?[a-zA-Z0-9]+)>");
-    private static final int MAX_LORE_CHAR = 30;
+    private static final int MAX_LORE_CHAR = 40;
     private static final MiniMessage MM = MiniMessage.miniMessage();
 
     /**
@@ -35,9 +35,7 @@ public class ItemBuilder {
         ItemStack item = new ItemStack(material);
         item.editMeta(meta -> {
             meta.displayName(MM.deserialize(name).decoration(TextDecoration.ITALIC, false));
-            if (loreString.length > 0) {
-                breakDownLore(meta, loreString);
-            }
+            breakDownLore(meta, loreString);
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         });
         return item;
@@ -53,6 +51,10 @@ public class ItemBuilder {
         List<Component> lore = new ArrayList<>();
 
         for(String line : loreString){
+
+            if (line.isBlank()){
+                lore.add(ColorTextBuilder.parse(""));
+            }
 
             String[] words = line.split(" ");
             StringBuilder currentLine = new StringBuilder();
