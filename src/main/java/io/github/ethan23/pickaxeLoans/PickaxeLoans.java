@@ -3,6 +3,7 @@ package io.github.ethan23.pickaxeLoans;
 import io.github.ethan23.pickaxeLoans.commands.LoanCommand;
 import io.github.ethan23.pickaxeLoans.commands.LoanCommandTabComplete;
 import io.github.ethan23.pickaxeLoans.cosmic.CosmicModule;
+import io.github.ethan23.pickaxeLoans.events.InventoryMoveItemListener;
 import io.github.ethan23.pickaxeLoans.task.DirtyLoanCleaner;
 import io.github.ethan23.pickaxeLoans.database.LoanStorage;
 import io.github.ethan23.pickaxeLoans.database.SqliteLoanStorage;
@@ -58,6 +59,7 @@ public final class PickaxeLoans extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerDeathListener(this.loanService), this);
         Bukkit.getPluginManager().registerEvents(new PlayerDropListener(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(this.loanService), this);
+        Bukkit.getPluginManager().registerEvents(new InventoryMoveItemListener(), this);
 
         //Commands
         Objects.requireNonNull(this.getCommand("loan")).setExecutor(new LoanCommand(this.loanService, playerInputListener, cosmicModule.getCosmicPlayerService()));
