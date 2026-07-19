@@ -6,8 +6,24 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
 
+/**
+ * Keeps loaned pickaxes inside the borrower's own inventory.
+ *
+ * <p>A loaned pickaxe is a tagged copy of the escrow original — if it
+ * could be stashed in a chest or any other container it would outlive the
+ * loan and duplicate the lender's pickaxe. Each handler below blocks one
+ * smuggling route into a container view. The player's own 2x2 crafting view
+ * ({@link InventoryType#CRAFTING}) is exempt, since items there never leave
+ * the player.
+ */
 public class InventoryMoveItemListener implements Listener {
 
+    /**
+     * Blocks the click-based routes into a container: shift-clicking a
+     * loaned item out of the player inventory, dropping a held loaned item
+     * into the top inventory, and hotbar-swapping a loaned item into the
+     * top inventory.
+     */
     @EventHandler(ignoreCancelled = true)
     public void onClick(InventoryClickEvent event) {
         Inventory top = event.getView().getTopInventory();
@@ -34,6 +50,7 @@ public class InventoryMoveItemListener implements Listener {
         }
     }
 
+    /** Blocks dragging a held loaned item across any slot of a container view. */
     @EventHandler(ignoreCancelled = true)
     public void onDrag(InventoryDragEvent event) {
         if (!PickaxeChecker.isLoanItem(event.getOldCursor())){

@@ -40,7 +40,15 @@ public class ActiveLoansMenu extends InventoryGUI {
             player.openInventory(prevInventory);
         }));
 
-        addButton(GUIDE_SLOT, Buttons.guide());
+        addButton(GUIDE_SLOT, Buttons.guide(
+                "<gray>These are the pickaxes you have put up for loan, along with their current status.",
+                "",
+                "<yellow>Listed <gray>pickaxes are on the market waiting for a borrower. Right-Click one to cancel the listing and get it back.",
+                "",
+                "<yellow>Borrowed <gray>pickaxes are out earning you taxes. You cannot touch them until the borrower's timer runs out and returns them.",
+                "",
+                "<yellow>Returned<gray>, <yellow>Expired<gray>, and <yellow>Canceled <gray>pickaxes are ready to collect. Right-Click to claim the pickaxe along with any taxes it earned."
+        ));
 
         loadLoanList();
     }
@@ -65,6 +73,7 @@ public class ActiveLoansMenu extends InventoryGUI {
     }
 
     private void addListedButton(int slot, Loan loan){
+
         addButton(slot, Buttons.activeLoanListed(loan, () -> {
             LoanResult result = loanService.cancel(loan.getLoanUUID());
             switch (result) {

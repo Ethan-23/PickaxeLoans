@@ -8,6 +8,11 @@ public class ColorTextBuilder {
 
     private static final MiniMessage MM = MiniMessage.miniMessage();
 
+    /**
+     * Allows you to build a component from a string with miniMessage.
+     * @param mm string to convert
+     * @return Component of string
+     */
     public static Component parse(String mm) {
         return MM.deserialize(mm).decoration(TextDecoration.ITALIC, false);
     }
