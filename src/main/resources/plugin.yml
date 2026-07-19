@@ -4,7 +4,11 @@ version: '${version}'
 main: io.github.ethan23.pickaxeLoans.PickaxeLoans
 api-version: '1.21.11'
 load: POSTWORLD
+
 commands:
   loan:
     aliases: [loans]
     description: handles pickaxe loan system
+
+libraries:
+  - org.xerial:sqlite-jdbc:3.53.2.0

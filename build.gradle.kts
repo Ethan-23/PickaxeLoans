@@ -9,6 +9,8 @@ repositories {
 }
 
 dependencies {
+    compileOnly("org.xerial:sqlite-jdbc:3.53.2.0")
+
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
 
     testImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
