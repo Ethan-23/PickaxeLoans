@@ -2,11 +2,13 @@ package io.github.ethan23.pickaxeLoans;
 
 import io.github.ethan23.pickaxeLoans.cosmic.PickaxeType;
 import io.github.ethan23.pickaxeLoans.model.Loan;
+import io.github.ethan23.pickaxeLoans.util.ComponentBuilder;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -40,7 +42,16 @@ public class PickaxeChecker {
 
     }
 
-    public static void removeLoan(Inventory inventory, LoanService loanService, UUID playerUUID) {
+    public static void removeLoan(LoanService loanService, UUID playerUUID) {
+
+        Player player = Bukkit.getPlayer(playerUUID);
+
+        if(player == null){
+            return;
+        }
+
+        Inventory inventory = player.getInventory();
+
         Loan borrowed = loanService.getBorrowersLoan(playerUUID);
         UUID validLoanUUID = borrowed != null ? borrowed.getLoanUUID() : null;
 
@@ -60,7 +71,9 @@ public class PickaxeChecker {
             }
 
             inventory.setItem(slot, null);
+            player.sendMessage(ComponentBuilder.parse("<yellow>Your loan has been returned."));
         }
+
     }
 
     public static int findMatching(Inventory inventory, ItemStack itemStack){
