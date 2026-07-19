@@ -122,6 +122,11 @@ public class ActiveLoansMenu extends InventoryGUI {
         addButton(i, Buttons.expiredLoanListed(loan, () -> {
             if (loan.getLoanState() == LoanState.CANCELLED || loan.getLoanState() == LoanState.EXPIRED) {
 
+                if (player.getInventory().firstEmpty() == -1) {
+                    player.sendMessage(parse("<red>You do not have enough inventory space!"));
+                    return;
+                }
+
                 player.getInventory().addItem(loan.getPickaxe());
                 loanService.deleteLoan(loan);
                 reloadPage();
