@@ -43,13 +43,11 @@ public class LoanCommand implements CommandExecutor {
         if(args.length == 1){
             if(args[0].equalsIgnoreCase("create")){
 
-                ItemStack heldItem = player.getInventory().getItemInMainHand();
+                ItemStack heldItem = player.getInventory().getItemInMainHand().clone();
                 if(!checkLoanCreateRequirements(heldItem)){
                     player.sendMessage(ComponentBuilder.parse("<red>You cannot loan this item!"));
                     return true;
                 }
-
-                //player.getInventory().setItemInMainHand(null);
 
                 player.sendMessage(ComponentBuilder.parse("<yellow>Creating Loan Listings"));
                 player.openInventory(new LoanCreateMenu(playerInputListener, loanService, player, heldItem, player.getInventory().getHeldItemSlot()).getInventory());
