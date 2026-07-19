@@ -119,4 +119,8 @@ public class LoanService {
         return loan.orElse(null);
 
     }
+
+    public boolean isBorrower(UUID uuid) {
+        return repository.isBorrowing(uuid);
+    }
 }
