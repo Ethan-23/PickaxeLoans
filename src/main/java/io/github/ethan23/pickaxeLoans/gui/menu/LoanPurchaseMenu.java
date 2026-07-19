@@ -1,0 +1,89 @@
+package io.github.ethan23.pickaxeLoans.gui.menu;
+
+import io.github.ethan23.pickaxeLoans.LoanService;
+import io.github.ethan23.pickaxeLoans.gui.Buttons;
+import io.github.ethan23.pickaxeLoans.gui.InventoryButton;
+import io.github.ethan23.pickaxeLoans.gui.InventoryGUI;
+import io.github.ethan23.pickaxeLoans.gui.LoanLore;
+import io.github.ethan23.pickaxeLoans.model.Loan;
+import io.github.ethan23.pickaxeLoans.model.LoanResult;
+import io.github.ethan23.pickaxeLoans.util.ComponentBuilder;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+
+import java.util.List;
+
+import static io.github.ethan23.pickaxeLoans.util.ComponentBuilder.parse;
+
+public class LoanPurchaseMenu extends InventoryGUI {
+
+    private static final Component INVENTORY_TITLE = ComponentBuilder.parse("Purchase Loan: Are you sure?");
+    private static final int INVENTORY_SIZE = 9;
+    private static final List<Integer> CONFIRM_SLOTS = List.of(0, 1, 2, 3);
+    private static final List<Integer> DENY_SLOTS = List.of(5, 6, 7, 8);
+    private static final Integer PICKAXE_SLOT = 4;
+
+    private final Inventory prevInventory;
+
+    public LoanPurchaseMenu(Inventory prevInventory, Player player, LoanService loanService, Loan loan) {
+        super(INVENTORY_SIZE, INVENTORY_TITLE);
+
+        this.prevInventory = prevInventory;
+
+        for(int i : CONFIRM_SLOTS){
+            addButton(i, Buttons.confirm(() -> {
+
+                //Check cost here
+
+                if(player.getInventory().firstEmpty() == -1){
+                    player.sendMessage(ComponentBuilder.parse("<red>You must have an open inventory space to loan!"));
+                    return;
+                }
+
+                LoanResult loanResult = loanService.borrow(player.getUniqueId(), loan.getLoanUUID());
+                switch (loanResult){
+                    case ALREADY_BORROWING -> {
+                        player.sendMessage(parse("<red>You are already borrowing a loan!"));
+                        player.openInventory(prevInventory);
+                    }
+                    case NOT_FOUND ->{
+                        player.sendMessage(parse("<red>Invalid Loan Attempt!"));
+                        player.openInventory(prevInventory);
+                    }
+                    case NOT_LISTED ->{
+                        player.sendMessage(parse("<red>Loan is no longer listed!"));
+                        player.openInventory(prevInventory);
+                    }
+                    case SUCCESS ->{
+                        player.sendMessage(parse("<yellow>You have accepted the loan from " + Bukkit.getOfflinePlayer(loan.getLenderUUID()).getName()));
+                        player.getInventory().addItem(loan.getLoanPickaxe());
+                        player.closeInventory();
+                    }
+                }
+
+            }));
+        }
+
+        for(int i : DENY_SLOTS){
+            addButton(i, Buttons.deny( () -> {
+                player.openInventory(prevInventory);
+            }));
+        }
+
+        addButton(PICKAXE_SLOT, new InventoryButton(LoanLore.of(loan)
+                .divider()
+                .callToAction()
+                .blank()
+                .price()
+                .lender()
+                .loanTime()
+                .xpTax()
+                .energyTax()
+                .offerExpires()
+                .divider()
+                .applyTo(loan.getPickaxe())
+        ));
+    }
+}
