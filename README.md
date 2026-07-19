@@ -7,8 +7,8 @@ A Paper plugin for Minecraft 1.21 that adds a player-driven **pickaxe lending ma
 **Lenders** hold a pickaxe and run `/loan create` to open the listing menu, where they configure the deal:
 
 - **Upfront cost** — a one-time fee paid in either money or energy
-- **XP tax** — a percentage of the XP the borrower earns while mining that goes to the lender
-- **Energy tax** — a percentage of the energy the borrower earns that goes to the lender
+- **XP tax** — a percentage of the XP the borrower earns while mining that goes to the lender. (On cosmic this would be a physical xp bottle to drink tiered at the ores mined)
+- **Energy tax** — a percentage of the energy the borrower earns that goes to the lender. (On cosmic this would account for extract fee)
 - **Duration** — how long the borrower keeps the pickaxe before it's automatically returned
 
 **Borrowers** run `/loan` to browse all listed pickaxes, preview the deal, and accept it. The pickaxe goes into their inventory tagged as a loaned item. While the loan is active:
