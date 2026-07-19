@@ -1,7 +1,7 @@
 package io.github.ethan23.pickaxeLoans.gui;
 
 import io.github.ethan23.pickaxeLoans.PickaxeLoans;
-import io.github.ethan23.pickaxeLoans.util.ComponentBuilder;
+import io.github.ethan23.pickaxeLoans.util.ColorTextBuilder;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -11,7 +11,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.awt.*;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -22,7 +21,7 @@ public class PlayerInputListener implements Listener {
 
     public void requestInput(Player player, Consumer<String> callback) {
         waitingPlayers.put(player.getUniqueId(), callback);
-        player.sendMessage(ComponentBuilder.parse("<gray>Type <red>cancel <gray>to stop"));
+        player.sendMessage(ColorTextBuilder.parse("<gray>Type <red>cancel <gray>to stop"));
     }
 
     @EventHandler

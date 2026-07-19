@@ -6,7 +6,7 @@ import io.github.ethan23.pickaxeLoans.item.PickaxeChecker;
 import io.github.ethan23.pickaxeLoans.gui.*;
 import io.github.ethan23.pickaxeLoans.model.Loan;
 import io.github.ethan23.pickaxeLoans.model.LoanState;
-import io.github.ethan23.pickaxeLoans.util.ComponentBuilder;
+import io.github.ethan23.pickaxeLoans.util.ColorTextBuilder;
 import io.github.ethan23.pickaxeLoans.util.ItemBuilder;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
@@ -19,7 +19,7 @@ import java.util.UUID;
 
 public class LoanListingMenu extends InventoryGUI {
 
-    private static final Component INVENTORY_TITLE = ComponentBuilder.parse("Loan Listing");
+    private static final Component INVENTORY_TITLE = ColorTextBuilder.parse("Loan Listing");
     private static final int INVENTORY_SIZE = 6 * 9;
     private static final int LOAN_SLOTS = 5 * 9;
     private static final int ACTIVE_LOAN_SLOT = 45;
@@ -82,11 +82,11 @@ public class LoanListingMenu extends InventoryGUI {
 
 
             if(loan == null){
-                player.sendMessage(ComponentBuilder.parse("<red>You are currently not borrowing a pickaxe!"));
+                player.sendMessage(ColorTextBuilder.parse("<red>You are currently not borrowing a pickaxe!"));
                 return;
             }
 
-            player.sendMessage(ComponentBuilder.parse("<yellow>You have returned your loan."));
+            player.sendMessage(ColorTextBuilder.parse("<yellow>You have returned your loan."));
             loanService.returnLoan(loan.getLoanUUID());
             PickaxeChecker.removeLoan(loanService, this.playerUUID);
             buildCurrentLoanAgreementButton();
