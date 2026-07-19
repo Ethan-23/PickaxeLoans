@@ -1,8 +1,12 @@
 package io.github.ethan23.pickaxeLoans;
 
-import io.github.ethan23.pickaxeLoans.model.*;
+import io.github.ethan23.pickaxeLoans.model.ActiveLoan;
+import io.github.ethan23.pickaxeLoans.model.Loan;
+import io.github.ethan23.pickaxeLoans.model.LoanDeal;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,237 +17,149 @@ public class LoanRepositoryTest {
         return new Loan(null, lenderUUID, new LoanDeal());
     }
 
+    private Loan borrowedLoan(UUID lenderUUID, UUID borrowerUUID, long durationMillis) {
+        Loan loan = newLoan(lenderUUID);
+        loan.markBorrowed(new ActiveLoan(borrowerUUID, durationMillis));
+        return loan;
+    }
+
     @Test
-    void createLoan_writesToAllThreeStructures() {
+    void add_storesLoanInAllLookups() {
         LoanRepository repo = new LoanRepository();
         UUID lender = UUID.randomUUID();
         Loan loan = newLoan(lender);
 
-        BorrowResult borrowResult = repo.createLoan(loan);
-
-        assertEquals(BorrowResult.SUCCESS, borrowResult);
+        assertTrue(repo.add(loan));
         assertEquals(loan, repo.findById(loan.getLoanUUID()).orElseThrow());
         assertTrue(repo.getLoansByLender(lender).contains(loan.getLoanUUID()));
         assertEquals(loan, repo.peekNextExpiration());
-
     }
 
     @Test
-    void createLoan_secondLoanFromSameLender_bothTracked() {
+    void add_duplicateUUID_isRejected() {
         LoanRepository repo = new LoanRepository();
         UUID lender = UUID.randomUUID();
-        BorrowResult borrowResult1 = repo.createLoan(newLoan(lender));
-        BorrowResult borrowResult2 = repo.createLoan(newLoan(lender));
+        Loan loan = newLoan(lender);
 
-        assertEquals(BorrowResult.SUCCESS, borrowResult1);
-        assertEquals(BorrowResult.SUCCESS, borrowResult2);
+        assertTrue(repo.add(loan));
+        assertFalse(repo.add(loan));
+        assertEquals(1, repo.getLoans().size());
+        assertEquals(1, repo.getLoansByLender(lender).size());
+    }
+
+    @Test
+    void add_multipleLoansSameLender_allTracked() {
+        LoanRepository repo = new LoanRepository();
+        UUID lender = UUID.randomUUID();
+
+        repo.add(newLoan(lender));
+        repo.add(newLoan(lender));
+
         assertEquals(2, repo.getLoansByLender(lender).size());
     }
 
     @Test
-    void createLoan_duplicateLoanUUID(){
+    void findById_unknownUUID_isEmpty() {
         LoanRepository repo = new LoanRepository();
-        UUID lender = UUID.randomUUID();
 
-        Loan loan = newLoan(lender);
-
-        BorrowResult borrowResult1 = repo.createLoan(loan);
-        BorrowResult borrowResult2 = repo.createLoan(loan);
-
-        assertEquals(BorrowResult.SUCCESS, borrowResult1);
-        assertEquals(BorrowResult.DUPLICATE_LOAN, borrowResult2);
-        assertEquals(1, repo.getLoansByLender(lender).size());
-        assertEquals(1, repo.getLoans().size());
+        assertTrue(repo.findById(UUID.randomUUID()).isEmpty());
     }
 
     @Test
-    void cancelLoan_updatesLoanState(){
+    void getLoansByLender_unknownLender_isEmpty() {
         LoanRepository repo = new LoanRepository();
-        UUID lender = UUID.randomUUID();
 
-        Loan loan = newLoan(lender);
-
-        repo.createLoan(loan);
-
-        BorrowResult borrowResult = repo.cancelLoan(loan.getLoanUUID());
-
-        assertEquals(BorrowResult.SUCCESS, borrowResult);
-        assertTrue(repo.findById(loan.getLoanUUID()).isPresent());
-        assertEquals(LoanState.CANCELLED, repo.findById(loan.getLoanUUID()).get().getLoanState());
+        assertTrue(repo.getLoansByLender(UUID.randomUUID()).isEmpty());
     }
 
     @Test
-    void cancelLoan_randomLoanUUID(){
-        LoanRepository repo = new LoanRepository();
-        UUID lender = UUID.randomUUID();
-
-        Loan loan = newLoan(lender);
-
-        repo.createLoan(loan);
-
-        BorrowResult borrowResult = repo.cancelLoan(lender);
-
-        assertEquals(BorrowResult.NOT_FOUND, borrowResult);
-    }
-
-    @Test
-    void cancelLoan_loanStateNotListed(){
-        LoanRepository repo = new LoanRepository();
-        UUID lender = UUID.randomUUID();
-
-        Loan loan = newLoan(lender);
-
-        repo.createLoan(loan);
-
-        loan.setLoanState(LoanState.RETURNED);
-
-        BorrowResult borrowResult = repo.cancelLoan(loan.getLoanUUID());
-
-        assertEquals(BorrowResult.NOT_LISTED, borrowResult);
-        assertTrue(repo.findById(loan.getLoanUUID()).isPresent());
-        assertEquals(LoanState.RETURNED, loan.getLoanState());
-    }
-
-    @Test
-    void cancelLoan_doubleCancel(){
-        LoanRepository repo = new LoanRepository();
-        UUID lender = UUID.randomUUID();
-
-        Loan loan = newLoan(lender);
-
-        repo.createLoan(loan);
-
-        BorrowResult borrowResult = repo.cancelLoan(loan.getLoanUUID());
-        BorrowResult borrowResult2 = repo.cancelLoan(loan.getLoanUUID());
-
-        assertEquals(BorrowResult.SUCCESS, borrowResult);
-        assertEquals(BorrowResult.NOT_LISTED, borrowResult2);
-        assertEquals(LoanState.CANCELLED, loan.getLoanState());
-    }
-
-    @Test
-    void borrowLoan_updateLoanState(){
+    void recordBorrow_tracksBorrower() {
         LoanRepository repo = new LoanRepository();
         UUID lender = UUID.randomUUID();
         UUID borrower = UUID.randomUUID();
-        Loan loan = newLoan(lender);
+        Loan loan = borrowedLoan(lender, borrower, 60_000L);
 
-        repo.createLoan(loan);
+        repo.add(loan);
+        repo.recordBorrow(loan);
 
-        BorrowResult borrowResult = repo.borrowLoan(borrower, loan.getLoanUUID());
-
-        assertEquals(BorrowResult.SUCCESS, borrowResult);
-        assertEquals(LoanState.BORROWED,loan.getLoanState());
-        assertNotNull(loan.getActiveLoan());
-        assertEquals(loan, repo.peekNextEndAt());
-        assertTrue(repo.getBorrowersLoanUUID(loan.getActiveLoan().getBorrowerUUID()).isPresent());
+        assertTrue(repo.isBorrowing(borrower));
+        assertEquals(loan.getLoanUUID(), repo.getBorrowersLoanUUID(borrower).orElseThrow());
     }
 
     @Test
-    void borrowLoan_playerDoubleBorrowAttempt(){
+    void recordReturn_clearsBorrower() {
         LoanRepository repo = new LoanRepository();
         UUID lender = UUID.randomUUID();
         UUID borrower = UUID.randomUUID();
-        Loan loan = newLoan(lender);
-        Loan loan2 = newLoan(lender);
+        Loan loan = borrowedLoan(lender, borrower, 60_000L);
 
-        repo.createLoan(loan);
-        repo.createLoan(loan2);
+        repo.add(loan);
+        repo.recordBorrow(loan);
+        repo.recordReturn(loan);
 
-        BorrowResult borrowResult = repo.borrowLoan(borrower, loan.getLoanUUID());
-        BorrowResult borrowResult2 = repo.borrowLoan(borrower, loan2.getLoanUUID());
-
-        assertEquals(BorrowResult.SUCCESS, borrowResult);
-        assertEquals(BorrowResult.ALREADY_BORROWING, borrowResult2);
-        assertEquals(LoanState.BORROWED, loan.getLoanState());
-        assertEquals(LoanState.LISTED, loan2.getLoanState());
-    }
-
-    @Test
-    void borrowLoan_sameLoanBorrowAttempt(){
-        LoanRepository repo = new LoanRepository();
-        UUID lender = UUID.randomUUID();
-        UUID borrower = UUID.randomUUID();
-        UUID borrower2 = UUID.randomUUID();
-        Loan loan = newLoan(lender);
-
-        repo.createLoan(loan);
-
-        BorrowResult borrowResult = repo.borrowLoan(borrower, loan.getLoanUUID());
-        BorrowResult borrowResult2 = repo.borrowLoan(borrower2, loan.getLoanUUID());
-
-        assertEquals(BorrowResult.SUCCESS, borrowResult);
-        assertEquals(BorrowResult.NOT_LISTED, borrowResult2);
-        assertEquals(LoanState.BORROWED, loan.getLoanState());
-    }
-
-    @Test
-    void returnLoan_updateLoanState(){
-        LoanRepository repo = new LoanRepository();
-        UUID lender = UUID.randomUUID();
-        UUID borrower = UUID.randomUUID();
-        Loan loan = newLoan(lender);
-
-        repo.createLoan(loan);
-
-        repo.borrowLoan(borrower, loan.getLoanUUID());
-
-        BorrowResult borrowResult = repo.returnLoan(loan.getLoanUUID());
+        assertFalse(repo.isBorrowing(borrower));
         assertTrue(repo.getBorrowersLoanUUID(borrower).isEmpty());
-        assertEquals(BorrowResult.SUCCESS, borrowResult);
-        assertEquals(LoanState.RETURNED, loan.getLoanState());
     }
 
     @Test
-    void returnLoan_incorrectLoanState(){
+    void deleteLoan_removesFromLoansAndLender() {
         LoanRepository repo = new LoanRepository();
         UUID lender = UUID.randomUUID();
-        UUID borrower = UUID.randomUUID();
         Loan loan = newLoan(lender);
 
-        repo.createLoan(loan);
+        repo.add(loan);
+        repo.deleteLoan(loan);
 
-        repo.borrowLoan(borrower, loan.getLoanUUID());
-
-        loan.setLoanState(LoanState.LISTED);
-
-        BorrowResult borrowResult = repo.returnLoan(loan.getLoanUUID());
-
-        assertEquals(BorrowResult.NOT_BORROWED, borrowResult);
-        assertEquals(LoanState.LISTED, loan.getLoanState());
-    }
-
-
-    @Test
-    void expiredLoan_UpdateData(){
-        LoanRepository repo = new LoanRepository();
-        UUID lender = UUID.randomUUID();
-
-        Loan loan = newLoan(lender);
-
-        repo.createLoan(loan);
-
-        BorrowResult borrowResult = repo.expireLoan(loan.getLoanUUID());
-
-        assertEquals(BorrowResult.SUCCESS, borrowResult);
-        assertEquals(LoanState.EXPIRED, loan.getLoanState());
+        assertTrue(repo.findById(loan.getLoanUUID()).isEmpty());
+        assertFalse(repo.getLoansByLender(lender).contains(loan.getLoanUUID()));
     }
 
     @Test
-    void expiredLoan_IncorrectLoanState(){
+    void endsAtHeap_ordersBySoonestEnd() {
         LoanRepository repo = new LoanRepository();
         UUID lender = UUID.randomUUID();
+        Loan longLoan = borrowedLoan(lender, UUID.randomUUID(), 600_000L);
+        Loan shortLoan = borrowedLoan(lender, UUID.randomUUID(), 10_000L);
 
-        Loan loan = newLoan(lender);
+        repo.add(longLoan);
+        repo.add(shortLoan);
+        repo.recordBorrow(longLoan);
+        repo.recordBorrow(shortLoan);
 
-        repo.createLoan(loan);
-
-        loan.setLoanState(LoanState.BORROWED);
-
-        BorrowResult borrowResult = repo.expireLoan(loan.getLoanUUID());
-
-        assertEquals(BorrowResult.NOT_LISTED, borrowResult);
-        assertEquals(LoanState.BORROWED, loan.getLoanState());
+        assertEquals(shortLoan, repo.peekNextEndAt());
+        repo.removeTopEndAt();
+        assertEquals(longLoan, repo.peekNextEndAt());
     }
 
+    @Test
+    void removeTopExpiration_removesHead() {
+        LoanRepository repo = new LoanRepository();
+        Loan loan = newLoan(UUID.randomUUID());
+
+        repo.add(loan);
+        assertEquals(loan, repo.peekNextExpiration());
+
+        repo.removeTopExpiration();
+        assertNull(repo.peekNextExpiration());
+    }
+
+    @Test
+    void getLoans_isUnmodifiable() {
+        LoanRepository repo = new LoanRepository();
+        Loan loan = newLoan(UUID.randomUUID());
+        repo.add(loan);
+
+        Map<UUID, Loan> view = repo.getLoans();
+        assertThrows(UnsupportedOperationException.class, () -> view.put(UUID.randomUUID(), loan));
+    }
+
+    @Test
+    void getLoansByLender_isUnmodifiable() {
+        LoanRepository repo = new LoanRepository();
+        UUID lender = UUID.randomUUID();
+        repo.add(newLoan(lender));
+
+        Set<UUID> view = repo.getLoansByLender(lender);
+        assertThrows(UnsupportedOperationException.class, () -> view.add(UUID.randomUUID()));
+    }
 }

@@ -1,9 +1,6 @@
 package io.github.ethan23.pickaxeLoans;
 
-import io.github.ethan23.pickaxeLoans.model.ActiveLoan;
-import io.github.ethan23.pickaxeLoans.model.BorrowResult;
 import io.github.ethan23.pickaxeLoans.model.Loan;
-import io.github.ethan23.pickaxeLoans.model.LoanState;
 
 import java.util.*;
 
@@ -21,108 +18,47 @@ public class LoanRepository {
     private final PriorityQueue<Loan> expirationHeap = new PriorityQueue<>(Comparator.comparingLong(Loan::getListingExpiresAt));
     private final PriorityQueue<Loan> endsAtHeap = new PriorityQueue<>(Comparator.comparingLong(loan -> loan.getActiveLoan().getEndsAt()));
 
-    public BorrowResult createLoan(Loan loan){
-        UUID lenderUUID = loan.getLenderUUID();
-        if(!lenderToLoans.containsKey(lenderUUID)){
-            lenderToLoans.put(lenderUUID, new LinkedHashSet<>());
-        }
-
+    public boolean add(Loan loan){
         UUID loanUUID = loan.getLoanUUID();
 
-        if(lenderToLoans.get(lenderUUID).contains(loanUUID)){
-            return BorrowResult.DUPLICATE_LOAN;
+        if(loans.containsKey(loanUUID)){
+            return false;
         }
 
-        lenderToLoans.get(lenderUUID).add(loan.getLoanUUID());
-        loans.put(loan.getLoanUUID(), loan);
+        loans.put(loanUUID, loan);
+        lenderToLoans.computeIfAbsent(loan.getLenderUUID(), k -> new LinkedHashSet<>()).add(loanUUID);
         expirationHeap.add(loan);
 
-        loan.setLoanState(LoanState.LISTED);
-
-        return BorrowResult.SUCCESS;
+        return true;
     }
 
-    public BorrowResult cancelLoan(UUID loanUUID){
-        if(!loans.containsKey(loanUUID)){
-            return BorrowResult.NOT_FOUND;
-        }
-
-        Loan loan = loans.get(loanUUID);
-
-        if(loan.getLoanState() != LoanState.LISTED){
-            return BorrowResult.NOT_LISTED;
-        }
-
-        loan.setLoanState(LoanState.CANCELLED);
-
-        return BorrowResult.SUCCESS;
-    }
-
-    public BorrowResult borrowLoan(UUID borrowerUUID, UUID loanUUID){
-
-        if(borrowerToLoan.containsKey(borrowerUUID)){
-            return BorrowResult.ALREADY_BORROWING;
-        }
-
-        if(!loans.containsKey(loanUUID)){
-            return BorrowResult.NOT_FOUND;
-        }
-
-        Loan loan = loans.get(loanUUID);
-
-        if(loan.getLoanState() != LoanState.LISTED){
-            return BorrowResult.NOT_LISTED;
-        }
-
-        ActiveLoan activeLoan = new ActiveLoan(
-                borrowerUUID,
-                loan.getLoanDeal().getLoanDurationMillis()
-        );
-        loan.setActiveLoan(activeLoan);
-
-        borrowerToLoan.put(borrowerUUID, loanUUID);
+    public void recordBorrow(Loan loan){
+        borrowerToLoan.put(loan.getActiveLoan().getBorrowerUUID(), loan.getLoanUUID());
         endsAtHeap.add(loan);
-
-        loan.setLoanState(LoanState.BORROWED);
-
-        return BorrowResult.SUCCESS;
     }
 
-    public BorrowResult returnLoan(UUID loanUUID){
-        if(!loans.containsKey(loanUUID)){
-            return BorrowResult.NOT_FOUND;
-        }
-
-        Loan loan = loans.get(loanUUID);
-
-        if(loan.getLoanState() != LoanState.BORROWED){
-            return BorrowResult.NOT_BORROWED;
-        }
-
+    public void recordReturn(Loan loan){
         borrowerToLoan.remove(loan.getActiveLoan().getBorrowerUUID());
-
-        loan.setLoanState(LoanState.RETURNED);
-
-        return BorrowResult.SUCCESS;
     }
 
-    public BorrowResult expireLoan(UUID loanUUID){
-        if(!loans.containsKey(loanUUID)){
-            return BorrowResult.NOT_FOUND;
+    public void deleteLoan(Loan loan) {
+        loans.remove(loan.getLoanUUID());
+        LinkedHashSet<UUID> bucket = lenderToLoans.get(loan.getLenderUUID());
+        if(bucket != null) {
+            bucket.remove(loan.getLoanUUID());
         }
-
-        Loan loan = loans.get(loanUUID);
-
-        if(loan.getLoanState() != LoanState.LISTED){
-            return BorrowResult.NOT_LISTED;
-        }
-
-        loan.setLoanState(LoanState.EXPIRED);
-        return BorrowResult.SUCCESS;
     }
 
-    public Optional<Loan> findById(UUID loanUUID){
+    public Optional<Loan> findById(UUID loanUUID) {
         return Optional.ofNullable(loans.get(loanUUID));
+    }
+
+    public boolean isBorrowing(UUID borrowerUUID) {
+        return borrowerToLoan.containsKey(borrowerUUID);
+    }
+
+    public Optional<UUID> getBorrowersLoanUUID(UUID uuid){
+        return Optional.ofNullable(borrowerToLoan.get(uuid));
     }
 
     public Set<UUID> getLoansByLender(UUID lenderUUID){
@@ -131,6 +67,10 @@ public class LoanRepository {
         }
 
         return Collections.unmodifiableSet(lenderToLoans.get(lenderUUID));
+    }
+
+    public Map<UUID, Loan> getLoans(){
+        return Collections.unmodifiableMap(loans);
     }
 
     public Loan peekNextExpiration(){
@@ -149,16 +89,4 @@ public class LoanRepository {
         expirationHeap.poll();
     }
 
-    public Map<UUID, Loan> getLoans(){
-        return Collections.unmodifiableMap(loans);
-    }
-
-    public Optional<UUID> getBorrowersLoanUUID(UUID uuid){
-        return Optional.ofNullable(borrowerToLoan.get(uuid));
-    }
-
-    public void deleteLoan(Loan loan) {
-        loans.remove(loan.getLoanUUID());
-        lenderToLoans.get(loan.getLenderUUID()).remove(loan.getLoanUUID());
-    }
 }
