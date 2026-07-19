@@ -26,14 +26,12 @@ public class ActiveLoansMenu extends InventoryGUI {
     private static final int BACK_SLOT = 45;
     private static final int GUIDE_SLOT = 53;
 
-    private final Inventory prevInventory;
     private final Player player;
     private final LoanService loanService;
     private final CosmicPlayerService cosmicPlayerService;
 
     public ActiveLoansMenu(Inventory prevInventory, Player player, LoanService loanService, CosmicPlayerService cosmicPlayerService) {
         super(INVENTORY_SIZE, INVENTORY_TITLE);
-        this.prevInventory = prevInventory;
         this.loanService = loanService;
         this.cosmicPlayerService = cosmicPlayerService;
         this.player = player;
@@ -53,63 +51,74 @@ public class ActiveLoansMenu extends InventoryGUI {
         for (Loan loan : loanService.getLenderLoans(player.getUniqueId()).reversed()) {
 
             if (loan.getLoanState() == LoanState.LISTED) {
-                addButton(i, Buttons.activeLoanListed(loan, () -> {
-                    LoanResult result = loanService.cancel(loan.getLoanUUID());
-                    switch (result) {
-                        case SUCCESS -> {
-                            reloadPage();
-                            player.sendMessage(parse("<yellow>Loan listing has been canceled."));
-                        }
-                        case NOT_LISTED -> {
-                            player.sendMessage(parse("<red>That loan is no longer listed!"));
-                        }
-                        case NOT_FOUND -> {
-                            reloadPage();
-                        }
-                        default -> {
-                        }
-                    }
-                }));
+                addListedButton(i, loan);
             } else if (loan.getLoanState() == LoanState.BORROWED) {
-                addButton(i, Buttons.activeLoanBorrowed(loan, () -> {
-                }));
+                addButton(i, Buttons.activeLoanBorrowed(loan, () -> {}));
             } else if (loan.getLoanState() == LoanState.RETURNED) {
-                addButton(i, Buttons.activeLoanReturned(loan, () -> {
-                    if (player.getInventory().firstEmpty() == -1) {
-                        player.sendMessage(parse("<red>You do not have enough inventory space!"));
-                        return;
-                    }
-
-                    loanService.deleteLoan(loan);
-                    reloadPage();
-                    player.getInventory().addItem(loan.getPickaxe());
-                    player.sendMessage(parse("<yellow>You have claimed your returned loan and fees."));
-
-                    BigDecimal totalEnergyAccrued = loan.getActiveLoan().getEnergyAccrued();
-                    BigDecimal totalExperienceAccrued = loan.getActiveLoan().getXpAccrued();
-
-                    UUID playerUUID = player.getUniqueId();
-
-                    cosmicPlayerService.addEnergy(playerUUID, totalEnergyAccrued);
-                    cosmicPlayerService.addExperience(playerUUID, totalExperienceAccrued);
-
-                    player.sendMessage(parse("+ " + totalEnergyAccrued + " Cosmic Energy"));
-                    player.sendMessage(parse("+ " + totalExperienceAccrued + " Experience"));
-                }));
+                addReturnedButton(i, loan);
             } else if (loan.getLoanState() == LoanState.CANCELLED || loan.getLoanState() == LoanState.EXPIRED) {
-                addButton(i, Buttons.expiredLoanListed(loan, () -> {
-                    if (loan.getLoanState() == LoanState.CANCELLED || loan.getLoanState() == LoanState.EXPIRED) {
-
-                        player.getInventory().addItem(loan.getPickaxe());
-                        loanService.deleteLoan(loan);
-                        reloadPage();
-                        player.sendMessage(parse("<yellow>Loan listing has been claimed."));
-                    }
-                }));
+                addCollectableButton(i, loan);
             }
             i++;
         }
 
+    }
+
+    private void addListedButton(int slot, Loan loan){
+        addButton(slot, Buttons.activeLoanListed(loan, () -> {
+            LoanResult result = loanService.cancel(loan.getLoanUUID());
+            switch (result) {
+                case SUCCESS -> {
+                    reloadPage();
+                    player.sendMessage(parse("<yellow>Loan listing has been canceled."));
+                }
+                case NOT_LISTED -> {
+                    player.sendMessage(parse("<red>That loan is no longer listed!"));
+                }
+                case NOT_FOUND -> {
+                    reloadPage();
+                }
+                default -> {
+                }
+            }
+        }));
+    }
+
+    private void addReturnedButton(int i, Loan loan) {
+        addButton(i, Buttons.activeLoanReturned(loan, () -> {
+            if (player.getInventory().firstEmpty() == -1) {
+                player.sendMessage(parse("<red>You do not have enough inventory space!"));
+                return;
+            }
+
+            loanService.deleteLoan(loan);
+            reloadPage();
+            player.getInventory().addItem(loan.getPickaxe());
+            player.sendMessage(parse("<yellow>You have claimed your returned loan and fees."));
+
+            BigDecimal totalEnergyAccrued = loan.getActiveLoan().getEnergyAccrued();
+            BigDecimal totalExperienceAccrued = loan.getActiveLoan().getXpAccrued();
+
+            UUID playerUUID = player.getUniqueId();
+
+            cosmicPlayerService.addEnergy(playerUUID, totalEnergyAccrued);
+            cosmicPlayerService.addExperience(playerUUID, totalExperienceAccrued);
+
+            player.sendMessage(parse("+ " + totalEnergyAccrued + " Cosmic Energy"));
+            player.sendMessage(parse("+ " + totalExperienceAccrued + " Experience"));
+        }));
+    }
+
+    private void addCollectableButton(int i, Loan loan) {
+        addButton(i, Buttons.expiredLoanListed(loan, () -> {
+            if (loan.getLoanState() == LoanState.CANCELLED || loan.getLoanState() == LoanState.EXPIRED) {
+
+                player.getInventory().addItem(loan.getPickaxe());
+                loanService.deleteLoan(loan);
+                reloadPage();
+                player.sendMessage(parse("<yellow>Loan listing has been claimed."));
+            }
+        }));
     }
 
     private void clearLoanList() {

@@ -118,6 +118,8 @@ public final class Buttons {
                         .xpTaxResult()
                         .energyTaxResult()
                         .divider()
+                        .blank()
+                        .exit()
                         .applyTo(loan.getPickaxe()), event -> {
             action.run();
         });
