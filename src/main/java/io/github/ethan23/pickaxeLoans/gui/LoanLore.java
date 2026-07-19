@@ -98,11 +98,13 @@ public final class LoanLore {
 
     public LoanLore exit() {
 
-        if(loan.getLoanState() == LoanState.LISTED){
+        LoanState loanState = loan.getLoanState();
+
+        if(loanState == LoanState.LISTED){
             lines.add(ColorTextBuilder.parse("<gray>Right-Click to <red>CANCEL <gray>Loan."));
-        }else if(loan.getLoanState() == LoanState.CANCELLED || loan.getLoanState() == LoanState.EXPIRED){
-            lines.add(ColorTextBuilder.parse("<gray>Right-Click to <green>CLAIM <gray>Loan."));
-        }else if(loan.getLoanState() == LoanState.BORROWED){
+        }else if(loanState == LoanState.CANCELLED || loanState == LoanState.EXPIRED || loanState == LoanState.RETURNED){
+            lines.add(ColorTextBuilder.parse("<gray>Click to <green>CLAIM <gray>Loan."));
+        }else if(loanState == LoanState.BORROWED){
             lines.add(ColorTextBuilder.parse("<gray>Right-Click to <gold>RETURN <gray>Loan."));
         }
 
