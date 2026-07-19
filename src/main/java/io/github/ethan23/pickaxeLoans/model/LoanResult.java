@@ -1,6 +1,6 @@
 package io.github.ethan23.pickaxeLoans.model;
 
-public enum BorrowResult {
+public enum LoanResult {
     SUCCESS,
     NOT_FOUND,
     NOT_LISTED,

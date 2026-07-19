@@ -1,6 +1,9 @@
 package io.github.ethan23.pickaxeLoans.model;
 
+import io.github.ethan23.pickaxeLoans.LoanKeys;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.UUID;
 
@@ -25,6 +28,34 @@ public class Loan {
         this.listingExpiresAt = this.createdAt + EXPIRATION_TIME;
         this.loanState = LoanState.LISTED;
         this.activeLoan = null;
+    }
+
+    public void cancel() {
+        requireState(LoanState.LISTED);
+        this.loanState = LoanState.CANCELLED;
+    }
+
+    public void expire() {
+        requireState(LoanState.LISTED);
+        this.loanState = LoanState.EXPIRED;
+    }
+
+    public void markBorrowed(ActiveLoan activeLoan) {
+        requireState(LoanState.LISTED);
+        this.activeLoan = activeLoan;         // set together with the transition
+        this.loanState = LoanState.BORROWED;
+    }
+
+    public void markReturned() {
+        requireState(LoanState.BORROWED);
+        this.loanState = LoanState.RETURNED;
+    }
+
+    private void requireState(LoanState expected) {
+        if (this.loanState != expected) {
+            throw new IllegalStateException(
+                    "Illegal transition: expected " + expected + " but loan was " + this.loanState);
+        }
     }
 
     public UUID getLoanUUID() {
@@ -57,6 +88,14 @@ public class Loan {
 
     public ActiveLoan getActiveLoan() {
         return activeLoan;
+    }
+
+    public ItemStack getLoanPickaxe(){
+        ItemStack loanPickaxe = pickaxe.clone();
+        ItemMeta pickaxeMeta = loanPickaxe.getItemMeta();
+        pickaxeMeta.getPersistentDataContainer().set(LoanKeys.loanKey, PersistentDataType.STRING, this.loanUUID.toString());
+        loanPickaxe.setItemMeta(pickaxeMeta);
+        return loanPickaxe;
     }
 
     public void setActiveLoan(ActiveLoan activeLoan) {

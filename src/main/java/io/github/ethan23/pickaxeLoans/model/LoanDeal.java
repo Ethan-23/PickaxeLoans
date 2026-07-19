@@ -3,14 +3,14 @@ package io.github.ethan23.pickaxeLoans.model;
 public class LoanDeal {
 
     private CostType costType;
-    private long upfrontCost;
+    private double upfrontCost;
     private int xpTaxPercent;
     private int energyTaxPercent;
     private long loanDurationMillis;
 
     public LoanDeal() {
         this.costType = CostType.MONEY;
-        this.upfrontCost = 1_000;
+        this.upfrontCost = 1_000.0;
         this.xpTaxPercent = 0;
         this.energyTaxPercent = 0;
         this.loanDurationMillis = 30 * 60 * 1000;
@@ -24,11 +24,11 @@ public class LoanDeal {
         this.costType = costType;
     }
 
-    public long getUpfrontCost() {
+    public double getUpfrontCost() {
         return upfrontCost;
     }
 
-    public void setUpfrontCost(long upfrontCost) {
+    public void setUpfrontCost(double upfrontCost) {
         this.upfrontCost = upfrontCost;
     }
 
