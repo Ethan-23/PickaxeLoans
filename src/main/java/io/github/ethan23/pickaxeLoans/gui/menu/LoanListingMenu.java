@@ -29,6 +29,7 @@ public class LoanListingMenu extends InventoryGUI {
     private static final int NEXT_PAGE_SLOT = 50;
     private static final int GUIDE_SLOT = 53;
 
+    private CosmicPlayerService cosmicPlayerService;
     private PlayerInputListener playerInputListener;
     private int page;
     private final Player player;
@@ -40,6 +41,7 @@ public class LoanListingMenu extends InventoryGUI {
         super(INVENTORY_SIZE, INVENTORY_TITLE);
         this.loanService = loanService;
         this.playerInputListener = playerInputListener;
+        this.cosmicPlayerService = cosmicPlayerService;
         this.page = 1;
         this.player = player;
         this.playerUUID = player.getUniqueId();
@@ -129,7 +131,7 @@ public class LoanListingMenu extends InventoryGUI {
                             .applyTo(loan.getPickaxe()),
                     event -> {
                         if(!loan.getLenderUUID().equals(this.playerUUID)) {
-                            player.openInventory(new LoanPurchaseMenu(getInventory(), player, loanService, loan).getInventory());
+                            player.openInventory(new LoanPurchaseMenu(getInventory(), player, loanService, loan, cosmicPlayerService).getInventory());
                         }
                     })
             );

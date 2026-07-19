@@ -1,5 +1,7 @@
 package io.github.ethan23.pickaxeLoans.gui.menu;
 
+import io.github.ethan23.pickaxeLoans.cosmic.service.CosmicPlayerService;
+import io.github.ethan23.pickaxeLoans.model.CostType;
 import io.github.ethan23.pickaxeLoans.service.LoanService;
 import io.github.ethan23.pickaxeLoans.gui.Buttons;
 import io.github.ethan23.pickaxeLoans.gui.InventoryButton;
@@ -13,6 +15,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static io.github.ethan23.pickaxeLoans.util.ComponentBuilder.parse;
@@ -25,17 +28,19 @@ public class LoanPurchaseMenu extends InventoryGUI {
     private static final List<Integer> DENY_SLOTS = List.of(5, 6, 7, 8);
     private static final Integer PICKAXE_SLOT = 4;
 
-    private final Inventory prevInventory;
-
-    public LoanPurchaseMenu(Inventory prevInventory, Player player, LoanService loanService, Loan loan) {
+    public LoanPurchaseMenu(Inventory prevInventory, Player player, LoanService loanService, Loan loan, CosmicPlayerService cosmicPlayerService) {
         super(INVENTORY_SIZE, INVENTORY_TITLE);
-
-        this.prevInventory = prevInventory;
 
         for(int i : CONFIRM_SLOTS){
             addButton(i, Buttons.confirm(() -> {
 
-                //Check cost here
+                //Would do the same with money here if I had economy
+                if(loan.getLoanDeal().getCostType() == CostType.ENERGY){
+                    BigDecimal energy = cosmicPlayerService.getEnergy(player.getUniqueId());
+                    if(energy.compareTo(BigDecimal.valueOf(loan.getLoanDeal().getUpfrontCost())) < 0){
+                        player.sendMessage(ComponentBuilder.parse("<red>You do not have enough energy to borrow this pickaxe!"));
+                    }
+                }
 
                 if(player.getInventory().firstEmpty() == -1){
                     player.sendMessage(ComponentBuilder.parse("<red>You must have an open inventory space to loan!"));

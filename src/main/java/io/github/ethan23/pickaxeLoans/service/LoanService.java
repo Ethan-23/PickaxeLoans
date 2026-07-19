@@ -57,6 +57,11 @@ public class LoanService {
         if (loan == null){
             return LoanResult.NOT_FOUND;
         }
+
+        if(borrowerUUID.equals(loan.getLoanUUID())){
+            return LoanResult.LENDERS_LOAN;
+        }
+
         if (loan.getLoanState() != LoanState.LISTED){
             return LoanResult.NOT_LISTED;
         }

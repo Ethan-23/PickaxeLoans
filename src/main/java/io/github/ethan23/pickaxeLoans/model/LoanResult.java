@@ -6,5 +6,6 @@ public enum LoanResult {
     NOT_LISTED,
     NOT_BORROWED,
     ALREADY_BORROWING,
+    LENDERS_LOAN,
     DUPLICATE_LOAN
 }
