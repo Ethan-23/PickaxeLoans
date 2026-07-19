@@ -113,7 +113,6 @@ public final class Buttons {
                 LoanLore.of(loan)
                         .divider()
                         .state()
-                        .remainingLoanTime()
                         .xpTaxResult()
                         .energyTaxResult()
                         .divider()
