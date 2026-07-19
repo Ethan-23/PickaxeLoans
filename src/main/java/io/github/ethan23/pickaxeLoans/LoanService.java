@@ -134,7 +134,7 @@ public class LoanService {
 
         while(true){
             Loan loan = repository.peekNextExpiration();
-            if (loan == null || loan.getActiveLoan() == null || loan.getActiveLoan().getEndsAt() > System.currentTimeMillis()) {
+            if (loan == null || loan.getListingExpiresAt() > System.currentTimeMillis()) {
                 break;
             }
             exprire(repository.peekNextExpiration());
