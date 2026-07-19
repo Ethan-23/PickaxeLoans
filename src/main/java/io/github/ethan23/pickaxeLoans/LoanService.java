@@ -1,24 +1,35 @@
 package io.github.ethan23.pickaxeLoans;
 
-import io.github.ethan23.pickaxeLoans.model.ActiveLoan;
-import io.github.ethan23.pickaxeLoans.model.Loan;
-import io.github.ethan23.pickaxeLoans.model.LoanResult;
-import io.github.ethan23.pickaxeLoans.model.LoanState;
+import io.github.ethan23.pickaxeLoans.database.LoanRecord;
+import io.github.ethan23.pickaxeLoans.database.LoanStorage;
+import io.github.ethan23.pickaxeLoans.model.*;
 
+import java.math.BigDecimal;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class LoanService {
 
     private final LoanRepository repository;
+    private final LoanStorage loanStorage;
+    private final Set<UUID> dirtyLoans;
+    private final Logger logger;
 
-    public LoanService(LoanRepository repository) {
+    private static final int DECIMAL_MOVEMENT = 2;
+
+    public LoanService(LoanRepository repository, LoanStorage loanStorage, Logger logger) {
         this.repository = repository;
+        this.loanStorage = loanStorage;
+        this.logger = logger;
+        this.dirtyLoans = new HashSet<>();
     }
 
     public LoanResult createListing(Loan loan) {
         if (!repository.add(loan)) {
             return LoanResult.DUPLICATE_LOAN;
         }
+        loanStorage.upsert(loan.toRecord());
         return LoanResult.SUCCESS;
     }
 
@@ -34,6 +45,7 @@ public class LoanService {
         }
 
         loan.cancel();
+        loanStorage.upsert(loan.toRecord());
         return LoanResult.SUCCESS;
     }
 
@@ -52,6 +64,7 @@ public class LoanService {
 
         loan.markBorrowed(new ActiveLoan(borrowerUUID, loan.getLoanDeal().getLoanDurationMillis()));
         repository.recordBorrow(loan);
+        loanStorage.upsert(loan.toRecord());
         return LoanResult.SUCCESS;
     }
 
@@ -61,11 +74,13 @@ public class LoanService {
             return LoanResult.NOT_LISTED;
         }
         loan.expire();
+        loanStorage.upsert(loan.toRecord());
         return LoanResult.SUCCESS;
     }
 
     public void deleteLoan(Loan loan){
         repository.deleteLoan(loan);
+        loanStorage.delete(loan.getLoanUUID());
     }
 
     public LoanResult returnLoan(UUID loanUUID) {
@@ -79,6 +94,7 @@ public class LoanService {
 
         loan.markReturned();
         repository.recordReturn(loan);
+        loanStorage.upsert(loan.toRecord());
         return LoanResult.SUCCESS;
     }
 
@@ -158,4 +174,53 @@ public class LoanService {
 
         return removedBorrowers;
     }
+
+    public void accruedXp(Loan loan, BigDecimal amount){
+        int tax = loan.getLoanDeal().getXpTaxPercent();
+        if(tax == 0){
+            return;
+        }
+        loan.getActiveLoan().accruedXp(amount.multiply(BigDecimal.valueOf(tax, DECIMAL_MOVEMENT)));
+        dirtyLoans.add(loan.getLoanUUID());
+    }
+
+    public void accruedEnergy(Loan loan, BigDecimal amount){
+        int tax = loan.getLoanDeal().getEnergyTaxPercent();
+        if(tax == 0){
+            return;
+        }
+        loan.getActiveLoan().accruedEnergy(amount.multiply(BigDecimal.valueOf(tax, DECIMAL_MOVEMENT)));
+        dirtyLoans.add(loan.getLoanUUID());
+    }
+
+    public void flushDirtyLoans(){
+
+        try {
+            for(UUID uuid : dirtyLoans){
+
+                Loan loan = repository.findById(uuid).orElse(null);
+
+                if(loan == null){
+                    continue;
+                }
+
+                loanStorage.upsert(loan.toRecord());
+            }
+            dirtyLoans.clear();
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Failed to flush dirty loans", e);
+        }
+
+    }
+
+    public void loadFromStorage(){
+        for(LoanRecord loanRecord : loanStorage.loadAll()){
+            Loan loan = Loan.fromRecord(loanRecord);
+            repository.add(loan);
+            if(loan.getLoanState() == LoanState.BORROWED){
+                repository.recordBorrow(loan);
+            }
+        }
+    }
+
 }

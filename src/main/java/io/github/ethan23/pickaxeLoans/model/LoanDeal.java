@@ -8,6 +8,14 @@ public class LoanDeal {
     private int energyTaxPercent;
     private long loanDurationMillis;
 
+    public LoanDeal(CostType costType, double upfrontCost, int xpTaxPercent, int energyTaxPercent, long loanDurationMillis) {
+        this.costType = costType;
+        this.upfrontCost = upfrontCost;
+        this.xpTaxPercent = xpTaxPercent;
+        this.energyTaxPercent = energyTaxPercent;
+        this.loanDurationMillis = loanDurationMillis;
+    }
+
     public LoanDeal() {
         this.costType = CostType.MONEY;
         this.upfrontCost = 1_000.0;
