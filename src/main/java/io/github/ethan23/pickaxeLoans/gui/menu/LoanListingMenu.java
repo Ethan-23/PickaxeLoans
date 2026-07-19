@@ -1,5 +1,6 @@
 package io.github.ethan23.pickaxeLoans.gui.menu;
 
+import io.github.ethan23.pickaxeLoans.cosmic.service.CosmicPlayerService;
 import io.github.ethan23.pickaxeLoans.service.LoanService;
 import io.github.ethan23.pickaxeLoans.item.PickaxeChecker;
 import io.github.ethan23.pickaxeLoans.gui.*;
@@ -35,7 +36,7 @@ public class LoanListingMenu extends InventoryGUI {
 
     private final LoanService loanService;
 
-    public LoanListingMenu(Player player, LoanService loanService, PlayerInputListener playerInputListener) {
+    public LoanListingMenu(Player player, LoanService loanService, PlayerInputListener playerInputListener, CosmicPlayerService cosmicPlayerService) {
         super(INVENTORY_SIZE, INVENTORY_TITLE);
         this.loanService = loanService;
         this.playerInputListener = playerInputListener;
@@ -44,7 +45,7 @@ public class LoanListingMenu extends InventoryGUI {
         this.playerUUID = player.getUniqueId();
 
         addButton(ACTIVE_LOAN_SLOT, new InventoryButton(ItemBuilder.of(Material.ENDER_CHEST, "<bold><yellow>Active Loans", "<gray>Click here to view and collect all the loans you created", "", "<bold><yellow>" + loanService.getLenderLoans(this.playerUUID).size() + " Item(s)"), event -> {
-            player.openInventory(new ActiveLoansMenu(getInventory(), player, loanService).getInventory());
+            player.openInventory(new ActiveLoansMenu(getInventory(), player, loanService, cosmicPlayerService).getInventory());
         }));
 
         buildCurrentLoanAgreementButton();

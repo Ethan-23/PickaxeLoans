@@ -2,6 +2,7 @@ package io.github.ethan23.pickaxeLoans;
 
 import io.github.ethan23.pickaxeLoans.commands.LoanCommand;
 import io.github.ethan23.pickaxeLoans.commands.LoanCommandTabComplete;
+import io.github.ethan23.pickaxeLoans.cosmic.CosmicModule;
 import io.github.ethan23.pickaxeLoans.task.DirtyLoanCleaner;
 import io.github.ethan23.pickaxeLoans.database.LoanStorage;
 import io.github.ethan23.pickaxeLoans.database.SqliteLoanStorage;
@@ -26,6 +27,7 @@ public final class PickaxeLoans extends JavaPlugin {
     private LoanUpdateTick loanUpdateTick;
     private DirtyLoanCleaner dirtyLoanCleaner;
     private LoanStorage storage;
+    private CosmicModule cosmicModule;
 
     @Override
     public void onEnable() {
@@ -45,6 +47,10 @@ public final class PickaxeLoans extends JavaPlugin {
         this.loanService = new LoanService(loanRepository, this.storage, getLogger());
         this.loanService.loadFromStorage();
 
+        //Cosmic Module
+        this.cosmicModule = new CosmicModule();
+        cosmicModule.enable(this, loanService);
+
         //Listeners
         PlayerInputListener playerInputListener = new PlayerInputListener();
         Bukkit.getPluginManager().registerEvents(new GUIListener(), this);
@@ -54,14 +60,14 @@ public final class PickaxeLoans extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(this.loanService), this);
 
         //Commands
-        Objects.requireNonNull(this.getCommand("loan")).setExecutor(new LoanCommand(this.loanService, playerInputListener));
+        Objects.requireNonNull(this.getCommand("loan")).setExecutor(new LoanCommand(this.loanService, playerInputListener, cosmicModule.getCosmicPlayerService()));
         Objects.requireNonNull(this.getCommand("loan")).setTabCompleter(new LoanCommandTabComplete());
 
         //Update
         this.loanUpdateTick = new LoanUpdateTick(this.loanService);
-        loanUpdateTick.init(this);
+        this.loanUpdateTick.init(this);
         this.dirtyLoanCleaner = new DirtyLoanCleaner(this.loanService);
-        dirtyLoanCleaner.init(this);
+        this.dirtyLoanCleaner.init(this);
 
     }
 
@@ -71,8 +77,13 @@ public final class PickaxeLoans extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        if(loanUpdateTick != null){
-            loanUpdateTick.cancel();
+
+        if(cosmicModule != null){
+            cosmicModule.disable();
+        }
+
+        if(this.loanUpdateTick != null){
+            this.loanUpdateTick.cancel();
         }
 
         if(this.dirtyLoanCleaner != null){

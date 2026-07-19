@@ -174,22 +174,26 @@ public class LoanService {
         return removedBorrowers;
     }
 
-    public void accruedXp(Loan loan, BigDecimal amount){
+    public BigDecimal accruedXp(Loan loan, BigDecimal amount){
         int tax = loan.getLoanDeal().getXpTaxPercent();
         if(tax == 0){
-            return;
+            return amount;
         }
-        loan.getActiveLoan().accruedXp(amount.multiply(BigDecimal.valueOf(tax, DECIMAL_MOVEMENT)));
+        BigDecimal taxedAmount = amount.multiply(BigDecimal.valueOf(tax, DECIMAL_MOVEMENT));
+        loan.getActiveLoan().accruedXp(taxedAmount);
         dirtyLoans.add(loan.getLoanUUID());
+        return amount.subtract(taxedAmount);
     }
 
-    public void accruedEnergy(Loan loan, BigDecimal amount){
+    public BigDecimal accruedEnergy(Loan loan, BigDecimal amount){
         int tax = loan.getLoanDeal().getEnergyTaxPercent();
         if(tax == 0){
-            return;
+            return amount;
         }
-        loan.getActiveLoan().accruedEnergy(amount.multiply(BigDecimal.valueOf(tax, DECIMAL_MOVEMENT)));
+        BigDecimal taxedAmount = amount.multiply(BigDecimal.valueOf(tax, DECIMAL_MOVEMENT));
+        loan.getActiveLoan().accruedEnergy(taxedAmount);
         dirtyLoans.add(loan.getLoanUUID());
+        return amount.subtract(taxedAmount);
     }
 
     public void flushDirtyLoans(){
@@ -220,5 +224,4 @@ public class LoanService {
             }
         }
     }
-
 }
