@@ -9,7 +9,7 @@ import io.github.ethan23.pickaxeLoans.gui.InventoryGUI;
 import io.github.ethan23.pickaxeLoans.gui.LoanLore;
 import io.github.ethan23.pickaxeLoans.model.Loan;
 import io.github.ethan23.pickaxeLoans.model.LoanResult;
-import io.github.ethan23.pickaxeLoans.util.ComponentBuilder;
+import io.github.ethan23.pickaxeLoans.util.ColorTextBuilder;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -19,40 +19,38 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-import static io.github.ethan23.pickaxeLoans.util.ComponentBuilder.parse;
+import static io.github.ethan23.pickaxeLoans.util.ColorTextBuilder.parse;
 
 public class LoanPurchaseMenu extends InventoryGUI {
 
-    private static final Component INVENTORY_TITLE = ComponentBuilder.parse("Purchase Loan: Are you sure?");
+    private static final Component INVENTORY_TITLE = ColorTextBuilder.parse("Purchase Loan: Are you sure?");
     private static final int INVENTORY_SIZE = 9;
     private static final List<Integer> CONFIRM_SLOTS = List.of(0, 1, 2, 3);
     private static final List<Integer> DENY_SLOTS = List.of(5, 6, 7, 8);
     private static final Integer PICKAXE_SLOT = 4;
 
+    private final CosmicPlayerService cosmicPlayerService;
+
     public LoanPurchaseMenu(Inventory prevInventory, Player player, LoanService loanService, Loan loan, CosmicPlayerService cosmicPlayerService) {
         super(INVENTORY_SIZE, INVENTORY_TITLE);
 
+        this.cosmicPlayerService = cosmicPlayerService;
         UUID playerUUID = player.getUniqueId();
 
         for(int i : CONFIRM_SLOTS){
             addButton(i, Buttons.confirm(() -> {
 
-                CostType costType = loan.getLoanDeal().getCostType();
-
                 if(player.getInventory().firstEmpty() == -1){
-                    player.sendMessage(ComponentBuilder.parse("<red>You must have an open inventory space to loan!"));
+                    player.sendMessage(ColorTextBuilder.parse("<red>You must have an open inventory space to loan!"));
                     return;
                 }
 
-                if(costType == CostType.ENERGY){
-                    BigDecimal energy = cosmicPlayerService.getEnergy(playerUUID);
-                    if(energy.compareTo(BigDecimal.valueOf(loan.getLoanDeal().getUpfrontCost())) < 0){
-                        player.sendMessage(ComponentBuilder.parse("<red>You do not have enough energy to borrow this pickaxe!"));
-                        return;
-                    }
-                    cosmicPlayerService.removeEnergy(playerUUID, energy);
+                BigDecimal cost = BigDecimal.valueOf(loan.getLoanDeal().getUpfrontCost());
+
+                if(loan.getLoanDeal().getCostType() == CostType.ENERGY && cosmicPlayerService.getEnergy(playerUUID).compareTo(cost) < 0){
+                    player.sendMessage(ColorTextBuilder.parse("<red>You do not have enough energy to borrow this pickaxe!"));
+                    return;
                 }
-                //Money check would go here if I implemented an economy :)
 
                 LoanResult loanResult = loanService.borrow(playerUUID, loan.getLoanUUID());
                 switch (loanResult){
@@ -73,6 +71,7 @@ public class LoanPurchaseMenu extends InventoryGUI {
                         player.openInventory(prevInventory);
                     }
                     case SUCCESS ->{
+                        chargePlayer(player, loan, cost);
                         player.sendMessage(parse("<yellow>You have accepted the loan from " + Bukkit.getOfflinePlayer(loan.getLenderUUID()).getName()));
                         player.getInventory().addItem(loan.getLoanPickaxe());
                         player.closeInventory();
@@ -101,5 +100,17 @@ public class LoanPurchaseMenu extends InventoryGUI {
                 .divider()
                 .applyTo(loan.getPickaxe())
         ));
+    }
+
+    private void chargePlayer(Player player, Loan loan, BigDecimal cost) {
+        UUID playerUUID = player.getUniqueId();
+        CostType costType = loan.getLoanDeal().getCostType();
+
+        if(costType == CostType.ENERGY){
+            cosmicPlayerService.removeEnergy(playerUUID, cost);
+        } else {
+            //Money check would go here if I implemented an economy :)
+            player.sendMessage(ColorTextBuilder.parse("<yellow>Money was not implemented here so have the pickaxe for free!"));
+        }
     }
 }

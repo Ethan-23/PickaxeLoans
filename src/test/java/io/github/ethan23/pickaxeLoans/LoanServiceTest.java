@@ -1,6 +1,5 @@
 package io.github.ethan23.pickaxeLoans;
 
-import io.github.ethan23.pickaxeLoans.database.LoanStorage;
 import io.github.ethan23.pickaxeLoans.model.Loan;
 import io.github.ethan23.pickaxeLoans.model.LoanDeal;
 import io.github.ethan23.pickaxeLoans.model.LoanResult;
@@ -9,10 +8,7 @@ import io.github.ethan23.pickaxeLoans.service.LoanRepository;
 import io.github.ethan23.pickaxeLoans.service.LoanService;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -20,33 +16,6 @@ import java.util.logging.Logger;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class LoanServiceTest {
-
-    static class InMemoryLoanStorage implements LoanStorage {
-        final Map<UUID, Loan> saved = new LinkedHashMap<>();
-
-        @Override
-        public void init() {
-        }
-
-        @Override
-        public void upsert(Loan loan) {
-            saved.put(loan.getLoanUUID(), loan);
-        }
-
-        @Override
-        public void delete(UUID loanUUID) {
-            saved.remove(loanUUID);
-        }
-
-        @Override
-        public List<Loan> loadAll() {
-            return new ArrayList<>(saved.values());
-        }
-
-        @Override
-        public void close() {
-        }
-    }
 
     private LoanService newService() {
         return new LoanService(new LoanRepository(), new InMemoryLoanStorage(), Logger.getGlobal());
@@ -250,5 +219,91 @@ public class LoanServiceTest {
         LoanService service = newService();
 
         assertNull(service.getBorrowersLoan(UUID.randomUUID()));
+    }
+
+    @Test
+    void createListing_overMaxLoans_isRejected() {
+        LoanService service = newService();
+        UUID lender = UUID.randomUUID();
+        assertEquals(LoanResult.SUCCESS, service.createListing(newLoan(lender)));
+        assertEquals(LoanResult.SUCCESS, service.createListing(newLoan(lender)));
+        assertEquals(LoanResult.SUCCESS, service.createListing(newLoan(lender)));
+
+        assertEquals(LoanResult.MAX_LOANS, service.createListing(newLoan(lender)));
+    }
+
+    @Test
+    void createListing_maxLoansOnlyCountsThatLender() {
+        LoanService service = newService();
+        UUID lender = UUID.randomUUID();
+        service.createListing(newLoan(UUID.randomUUID()));
+        service.createListing(newLoan(lender));
+        service.createListing(newLoan(lender));
+
+        assertEquals(LoanResult.SUCCESS, service.createListing(newLoan(lender)));
+    }
+
+    @Test
+    void borrow_ownLoan_isRejected() {
+        LoanService service = newService();
+        UUID lender = UUID.randomUUID();
+        Loan loan = newLoan(lender);
+        service.createListing(loan);
+
+        assertEquals(LoanResult.LENDERS_LOAN, service.borrow(lender, loan.getLoanUUID()));
+        assertEquals(LoanState.LISTED, loan.getLoanState());
+    }
+
+    @Test
+    void expire_listedLoan_isExpired() {
+        LoanService service = newService();
+        Loan loan = newLoan(UUID.randomUUID());
+        service.createListing(loan);
+
+        assertEquals(LoanResult.SUCCESS, service.expire(loan));
+        assertEquals(LoanState.EXPIRED, loan.getLoanState());
+    }
+
+    @Test
+    void expire_borrowedLoan_isNotListed() {
+        LoanService service = newService();
+        Loan loan = newLoan(UUID.randomUUID());
+        service.createListing(loan);
+        service.borrow(UUID.randomUUID(), loan.getLoanUUID());
+
+        assertEquals(LoanResult.NOT_LISTED, service.expire(loan));
+        assertEquals(LoanState.BORROWED, loan.getLoanState());
+    }
+
+    @Test
+    void deleteLoan_removesFromServiceAndStorage() {
+        InMemoryLoanStorage storage = new InMemoryLoanStorage();
+        LoanService service = new LoanService(new LoanRepository(), storage, Logger.getGlobal());
+        Loan loan = newLoan(UUID.randomUUID());
+        service.createListing(loan);
+
+        service.deleteLoan(loan);
+
+        assertFalse(service.getListedLoans().contains(loan));
+        assertFalse(storage.saved.containsKey(loan.getLoanUUID()));
+    }
+
+    @Test
+    void loadFromStorage_restoresListedAndBorrowedLoans() {
+        InMemoryLoanStorage storage = new InMemoryLoanStorage();
+        LoanService original = new LoanService(new LoanRepository(), storage, Logger.getGlobal());
+        UUID borrower = UUID.randomUUID();
+        Loan listed = newLoan(UUID.randomUUID());
+        Loan borrowed = newLoan(UUID.randomUUID());
+        original.createListing(listed);
+        original.createListing(borrowed);
+        original.borrow(borrower, borrowed.getLoanUUID());
+
+        LoanService reloaded = new LoanService(new LoanRepository(), storage, Logger.getGlobal());
+        reloaded.loadFromStorage();
+
+        assertTrue(reloaded.getListedLoans().contains(listed));
+        assertTrue(reloaded.isBorrower(borrower));
+        assertEquals(borrowed, reloaded.getBorrowersLoan(borrower));
     }
 }

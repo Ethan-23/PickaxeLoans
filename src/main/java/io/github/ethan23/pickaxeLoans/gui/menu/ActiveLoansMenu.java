@@ -16,7 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import static io.github.ethan23.pickaxeLoans.util.ComponentBuilder.parse;
+import static io.github.ethan23.pickaxeLoans.util.ColorTextBuilder.parse;
 
 public class ActiveLoansMenu extends InventoryGUI {
 

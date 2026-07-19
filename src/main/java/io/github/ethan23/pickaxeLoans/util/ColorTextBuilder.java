@@ -4,7 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
-public class ComponentBuilder {
+public class ColorTextBuilder {
 
     private static final MiniMessage MM = MiniMessage.miniMessage();
 

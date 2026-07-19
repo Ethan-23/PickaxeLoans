@@ -5,7 +5,7 @@ import io.github.ethan23.pickaxeLoans.service.LoanService;
 import io.github.ethan23.pickaxeLoans.gui.PlayerInputListener;
 import io.github.ethan23.pickaxeLoans.gui.menu.LoanCreateMenu;
 import io.github.ethan23.pickaxeLoans.gui.menu.LoanListingMenu;
-import io.github.ethan23.pickaxeLoans.util.ComponentBuilder;
+import io.github.ethan23.pickaxeLoans.util.ColorTextBuilder;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -35,7 +35,7 @@ public class LoanCommand implements CommandExecutor {
         }
 
         if(args.length == 0){
-            player.sendMessage(ComponentBuilder.parse("<yellow>Opening Loan Listings"));
+            player.sendMessage(ColorTextBuilder.parse("<yellow>Opening Loan Listings"));
             player.openInventory(new LoanListingMenu(player, loanService, playerInputListener, cosmicPlayerService).getInventory());
             return true;
         }
@@ -45,11 +45,11 @@ public class LoanCommand implements CommandExecutor {
 
                 ItemStack heldItem = player.getInventory().getItemInMainHand().clone();
                 if(!checkLoanCreateRequirements(heldItem)){
-                    player.sendMessage(ComponentBuilder.parse("<red>You cannot loan this item!"));
+                    player.sendMessage(ColorTextBuilder.parse("<red>You cannot loan this item!"));
                     return true;
                 }
 
-                player.sendMessage(ComponentBuilder.parse("<yellow>Creating Loan Listings"));
+                player.sendMessage(ColorTextBuilder.parse("<yellow>Creating Loan Listings"));
                 player.openInventory(new LoanCreateMenu(playerInputListener, loanService, player, heldItem, player.getInventory().getHeldItemSlot()).getInventory());
 
                 return true;

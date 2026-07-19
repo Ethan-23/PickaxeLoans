@@ -32,7 +32,7 @@ public class BlockBreakListener implements Listener {
         this.brokenOres = new HashSet<>();
     }
 
-    @EventHandler
+    @EventHandler (ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
 
@@ -46,6 +46,7 @@ public class BlockBreakListener implements Listener {
 
         Material material = block.getType();
         event.setCancelled(true);
+
         if(!OreType.isOreType(material)) {
             return;
         }
@@ -57,9 +58,9 @@ public class BlockBreakListener implements Listener {
 
         ItemStack pickaxe = player.getInventory().getItemInMainHand();
 
+
+
         handleCosmicGains(playerUUID, pickaxe, oreType);
-
-
 
     }
 

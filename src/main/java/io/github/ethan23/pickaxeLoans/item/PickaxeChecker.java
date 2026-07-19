@@ -3,7 +3,7 @@ package io.github.ethan23.pickaxeLoans.item;
 import io.github.ethan23.pickaxeLoans.cosmic.model.PickaxeType;
 import io.github.ethan23.pickaxeLoans.model.Loan;
 import io.github.ethan23.pickaxeLoans.service.LoanService;
-import io.github.ethan23.pickaxeLoans.util.ComponentBuilder;
+import io.github.ethan23.pickaxeLoans.util.ColorTextBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -72,7 +72,7 @@ public class PickaxeChecker {
             }
 
             inventory.setItem(slot, null);
-            player.sendMessage(ComponentBuilder.parse("<yellow>Your loan has been returned."));
+            player.sendMessage(ColorTextBuilder.parse("<yellow>Your loan has been returned."));
         }
 
     }

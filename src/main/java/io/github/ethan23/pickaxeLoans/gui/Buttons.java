@@ -61,7 +61,6 @@ public final class Buttons {
                         .divider()
                         .state()
                         .price()
-                        .loanTime()
                         .xpTax()
                         .energyTax()
                         .divider()

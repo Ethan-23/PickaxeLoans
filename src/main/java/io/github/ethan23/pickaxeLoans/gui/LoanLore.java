@@ -4,7 +4,7 @@ import io.github.ethan23.pickaxeLoans.model.CostType;
 import io.github.ethan23.pickaxeLoans.model.Loan;
 import io.github.ethan23.pickaxeLoans.model.LoanDeal;
 import io.github.ethan23.pickaxeLoans.model.LoanState;
-import io.github.ethan23.pickaxeLoans.util.ComponentBuilder;
+import io.github.ethan23.pickaxeLoans.util.ColorTextBuilder;
 import io.github.ethan23.pickaxeLoans.util.NumberConversions;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -30,7 +30,7 @@ public final class LoanLore {
     }
 
     public LoanLore divider() {
-        lines.add(ComponentBuilder.parse("<gray>-------------------------"));
+        lines.add(ColorTextBuilder.parse("<gray>-------------------------"));
         return this;
     }
 
@@ -40,7 +40,7 @@ public final class LoanLore {
     }
 
     public LoanLore callToAction() {
-        lines.add(ComponentBuilder.parse("<bold><yellow>Click item to loan!"));
+        lines.add(ColorTextBuilder.parse("<bold><yellow>Click item to loan!"));
         return this;
     }
 
@@ -49,68 +49,68 @@ public final class LoanLore {
         String value = deal.getCostType() == CostType.MONEY
                 ? "$" + cost
                 : cost + " cosmic energy";
-        lines.add(ComponentBuilder.parse("<gold>Price: <yellow>" + value));
+        lines.add(ColorTextBuilder.parse("<gold>Price: <yellow>" + value));
         return this;
     }
 
     public LoanLore lender() {
         var p = Bukkit.getOfflinePlayer(loan.getLenderUUID());
         String name = p.getName() == null ? "Unknown" : p.getName();
-        lines.add(ComponentBuilder.parse("<gold>Lender: <yellow>" + name));
+        lines.add(ColorTextBuilder.parse("<gold>Lender: <yellow>" + name));
         return this;
     }
 
     public LoanLore loanTime() {
-        lines.add(ComponentBuilder.parse("<gold>Loan Time: <yellow>" + NumberConversions.timeFromMillis(deal.getLoanDurationMillis())));
+        lines.add(ColorTextBuilder.parse("<gold>Loan Time: <yellow>" + NumberConversions.timeFromMillis(deal.getLoanDurationMillis())));
         return this;
     }
 
     public LoanLore xpTax() {
-        lines.add(ComponentBuilder.parse("<gold>Xp Tax: <yellow>" + deal.getXpTaxPercent() + "%"));
+        lines.add(ColorTextBuilder.parse("<gold>Xp Tax: <yellow>" + deal.getXpTaxPercent() + "%"));
         return this;
     }
 
     public LoanLore xpTaxResult() {
-        lines.add(ComponentBuilder.parse("<gold>Xp Tax: <yellow>" + deal.getXpTaxPercent() + "%" + " (" + NumberConversions.formattedNumberDisplay(loan.getActiveLoan().getXpAccrued()) + ")"));
+        lines.add(ColorTextBuilder.parse("<gold>Xp Tax: <yellow>" + deal.getXpTaxPercent() + "%" + " (" + NumberConversions.formattedNumberDisplay(loan.getActiveLoan().getXpAccrued()) + ")"));
         return this;
     }
 
     public LoanLore energyTaxResult() {
-        lines.add(ComponentBuilder.parse("<gold>Energy Tax: <yellow>" + deal.getEnergyTaxPercent() + "%" + " (" + NumberConversions.formattedNumberDisplay(loan.getActiveLoan().getEnergyAccrued()) + ")"));
+        lines.add(ColorTextBuilder.parse("<gold>Energy Tax: <yellow>" + deal.getEnergyTaxPercent() + "%" + " (" + NumberConversions.formattedNumberDisplay(loan.getActiveLoan().getEnergyAccrued()) + ")"));
         return this;
     }
 
     public LoanLore energyTax() {
-        lines.add(ComponentBuilder.parse("<gold>Energy Tax: <yellow>" + deal.getEnergyTaxPercent() + "%"));
+        lines.add(ColorTextBuilder.parse("<gold>Energy Tax: <yellow>" + deal.getEnergyTaxPercent() + "%"));
         return this;
     }
 
     public LoanLore offerExpires() {
         long remaining = loan.getListingExpiresAt() - System.currentTimeMillis();
-        lines.add(ComponentBuilder.parse("<gold>Offer Expires: <yellow>" + NumberConversions.timeFromMillis(remaining)));
+        lines.add(ColorTextBuilder.parse("<gold>Offer Expires: <yellow>" + NumberConversions.timeFromMillis(remaining)));
         return this;
     }
 
     public LoanLore state() {
-        lines.add(ComponentBuilder.parse("<gold>Loan State: <yellow>" + loan.getLoanState().toString()));
+        lines.add(ColorTextBuilder.parse("<gold>Loan State: <yellow>" + loan.getLoanState().toString()));
         return this;
     }
 
     public LoanLore exit() {
 
         if(loan.getLoanState() == LoanState.LISTED){
-            lines.add(ComponentBuilder.parse("<gray>Right-Click to <red>CANCEL <gray>Loan."));
+            lines.add(ColorTextBuilder.parse("<gray>Right-Click to <red>CANCEL <gray>Loan."));
         }else if(loan.getLoanState() == LoanState.CANCELLED || loan.getLoanState() == LoanState.EXPIRED){
-            lines.add(ComponentBuilder.parse("<gray>Right-Click to <green>CLAIM <gray>Loan."));
+            lines.add(ColorTextBuilder.parse("<gray>Right-Click to <green>CLAIM <gray>Loan."));
         }else if(loan.getLoanState() == LoanState.BORROWED){
-            lines.add(ComponentBuilder.parse("<gray>Right-Click to <gold>RETURN <gray>Loan."));
+            lines.add(ColorTextBuilder.parse("<gray>Right-Click to <gold>RETURN <gray>Loan."));
         }
 
         return this;
     }
 
     public LoanLore remainingLoanTime() {
-        lines.add(ComponentBuilder.parse("<gold>Remaining Loan Time: <yellow>" + NumberConversions.timeFromMillis(loan.getActiveLoan().getEndsAt() - System.currentTimeMillis())));
+        lines.add(ColorTextBuilder.parse("<gold>Remaining Loan Time: <yellow>" + NumberConversions.timeFromMillis(loan.getActiveLoan().getEndsAt() - System.currentTimeMillis())));
         return this;
     }
 
