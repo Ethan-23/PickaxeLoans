@@ -17,6 +17,7 @@ import org.bukkit.inventory.Inventory;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 import static io.github.ethan23.pickaxeLoans.util.ComponentBuilder.parse;
 
@@ -31,24 +32,34 @@ public class LoanPurchaseMenu extends InventoryGUI {
     public LoanPurchaseMenu(Inventory prevInventory, Player player, LoanService loanService, Loan loan, CosmicPlayerService cosmicPlayerService) {
         super(INVENTORY_SIZE, INVENTORY_TITLE);
 
+        UUID playerUUID = player.getUniqueId();
+
         for(int i : CONFIRM_SLOTS){
             addButton(i, Buttons.confirm(() -> {
 
-                //Would do the same with money here if I had economy
-                if(loan.getLoanDeal().getCostType() == CostType.ENERGY){
-                    BigDecimal energy = cosmicPlayerService.getEnergy(player.getUniqueId());
-                    if(energy.compareTo(BigDecimal.valueOf(loan.getLoanDeal().getUpfrontCost())) < 0){
-                        player.sendMessage(ComponentBuilder.parse("<red>You do not have enough energy to borrow this pickaxe!"));
-                    }
-                }
+                CostType costType = loan.getLoanDeal().getCostType();
 
                 if(player.getInventory().firstEmpty() == -1){
                     player.sendMessage(ComponentBuilder.parse("<red>You must have an open inventory space to loan!"));
                     return;
                 }
 
-                LoanResult loanResult = loanService.borrow(player.getUniqueId(), loan.getLoanUUID());
+                if(costType == CostType.ENERGY){
+                    BigDecimal energy = cosmicPlayerService.getEnergy(playerUUID);
+                    if(energy.compareTo(BigDecimal.valueOf(loan.getLoanDeal().getUpfrontCost())) < 0){
+                        player.sendMessage(ComponentBuilder.parse("<red>You do not have enough energy to borrow this pickaxe!"));
+                        return;
+                    }
+                    cosmicPlayerService.removeEnergy(playerUUID, energy);
+                }
+                //Money check would go here if I implemented an economy :)
+
+                LoanResult loanResult = loanService.borrow(playerUUID, loan.getLoanUUID());
                 switch (loanResult){
+                    case LENDERS_LOAN -> {
+                        player.sendMessage(parse("<red>You cannot loan from yourself. If you wish to cancel go to your active loans!"));
+                        player.openInventory(prevInventory);
+                    }
                     case ALREADY_BORROWING -> {
                         player.sendMessage(parse("<red>You are already borrowing a loan!"));
                         player.openInventory(prevInventory);

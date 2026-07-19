@@ -34,4 +34,8 @@ public class PlayerData {
     public void increaseExperience(BigDecimal amount){
         this.experience = this.experience.add(amount);
     }
+
+    public void removeEnergy(BigDecimal amount) {
+        this.energy = this.energy.subtract(amount);
+    }
 }

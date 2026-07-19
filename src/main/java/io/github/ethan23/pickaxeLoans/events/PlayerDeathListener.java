@@ -24,7 +24,7 @@ public class PlayerDeathListener implements Listener {
     }
 
     @EventHandler
-    public void PlayerDeathEvent(PlayerDeathEvent event){
+    public void playerDeathEvent(PlayerDeathEvent event){
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
         Iterator<ItemStack> iterator = event.getDrops().iterator();
