@@ -1,5 +1,7 @@
-package io.github.ethan23.pickaxeLoans;
+package io.github.ethan23.pickaxeLoans.task;
 
+import io.github.ethan23.pickaxeLoans.item.PickaxeChecker;
+import io.github.ethan23.pickaxeLoans.service.LoanService;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 

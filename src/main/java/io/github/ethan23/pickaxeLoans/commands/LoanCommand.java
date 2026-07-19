@@ -1,6 +1,6 @@
 package io.github.ethan23.pickaxeLoans.commands;
 
-import io.github.ethan23.pickaxeLoans.LoanService;
+import io.github.ethan23.pickaxeLoans.service.LoanService;
 import io.github.ethan23.pickaxeLoans.gui.PlayerInputListener;
 import io.github.ethan23.pickaxeLoans.gui.menu.LoanCreateMenu;
 import io.github.ethan23.pickaxeLoans.gui.menu.LoanListingMenu;
@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import static io.github.ethan23.pickaxeLoans.PickaxeChecker.checkLoanCreateRequirements;
+import static io.github.ethan23.pickaxeLoans.item.PickaxeChecker.checkLoanCreateRequirements;
 
 public class LoanCommand implements CommandExecutor {
 

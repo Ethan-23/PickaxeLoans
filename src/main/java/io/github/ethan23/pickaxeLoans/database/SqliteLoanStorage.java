@@ -1,6 +1,7 @@
 package io.github.ethan23.pickaxeLoans.database;
 
 import io.github.ethan23.pickaxeLoans.model.CostType;
+import io.github.ethan23.pickaxeLoans.model.Loan;
 import io.github.ethan23.pickaxeLoans.model.LoanState;
 
 import java.io.IOException;
@@ -86,7 +87,9 @@ public class SqliteLoanStorage implements LoanStorage {
     }
 
     @Override
-    public void upsert(LoanRecord loanRecord) {
+    public void upsert(Loan loan) {
+        LoanRecord loanRecord = loan.toRecord();
+
         try (PreparedStatement statement = connection.prepareStatement(UPSERT_SQL)) {
             statement.setString(1, loanRecord.loanUUID().toString());
             statement.setString(2, loanRecord.lenderUUID().toString());
@@ -130,20 +133,20 @@ public class SqliteLoanStorage implements LoanStorage {
     }
 
     @Override
-    public List<LoanRecord> loadAll() {
-        List<LoanRecord> records = new ArrayList<>();
+    public List<Loan> loadAll() {
+        List<Loan> loans = new ArrayList<>();
 
         try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM loans ORDER BY created_at");
              ResultSet resultSet = statement.executeQuery()) {
 
             while (resultSet.next()) {
-                records.add(readRecord(resultSet));
+                loans.add(Loan.fromRecord(readRecord(resultSet)));
             }
         } catch (SQLException e) {
             throw new IllegalStateException("Could not load loans", e);
         }
 
-        return records;
+        return loans;
     }
 
     private LoanRecord readRecord(ResultSet resultSet) throws SQLException {

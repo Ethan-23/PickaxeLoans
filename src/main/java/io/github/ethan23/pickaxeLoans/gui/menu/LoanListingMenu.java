@@ -1,7 +1,7 @@
 package io.github.ethan23.pickaxeLoans.gui.menu;
 
-import io.github.ethan23.pickaxeLoans.LoanService;
-import io.github.ethan23.pickaxeLoans.PickaxeChecker;
+import io.github.ethan23.pickaxeLoans.service.LoanService;
+import io.github.ethan23.pickaxeLoans.item.PickaxeChecker;
 import io.github.ethan23.pickaxeLoans.gui.*;
 import io.github.ethan23.pickaxeLoans.model.Loan;
 import io.github.ethan23.pickaxeLoans.model.LoanState;

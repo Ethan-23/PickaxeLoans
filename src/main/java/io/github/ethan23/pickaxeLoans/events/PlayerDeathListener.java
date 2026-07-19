@@ -1,7 +1,7 @@
 package io.github.ethan23.pickaxeLoans.events;
 
-import io.github.ethan23.pickaxeLoans.LoanKeys;
-import io.github.ethan23.pickaxeLoans.LoanService;
+import io.github.ethan23.pickaxeLoans.item.LoanKeys;
+import io.github.ethan23.pickaxeLoans.service.LoanService;
 import io.github.ethan23.pickaxeLoans.util.ComponentBuilder;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import org.bukkit.entity.Player;

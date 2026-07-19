@@ -1,20 +1,54 @@
 package io.github.ethan23.pickaxeLoans;
 
+import io.github.ethan23.pickaxeLoans.database.LoanStorage;
 import io.github.ethan23.pickaxeLoans.model.Loan;
 import io.github.ethan23.pickaxeLoans.model.LoanDeal;
 import io.github.ethan23.pickaxeLoans.model.LoanResult;
 import io.github.ethan23.pickaxeLoans.model.LoanState;
+import io.github.ethan23.pickaxeLoans.service.LoanRepository;
+import io.github.ethan23.pickaxeLoans.service.LoanService;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class LoanServiceTest {
 
+    static class InMemoryLoanStorage implements LoanStorage {
+        final Map<UUID, Loan> saved = new LinkedHashMap<>();
+
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public void upsert(Loan loan) {
+            saved.put(loan.getLoanUUID(), loan);
+        }
+
+        @Override
+        public void delete(UUID loanUUID) {
+            saved.remove(loanUUID);
+        }
+
+        @Override
+        public List<Loan> loadAll() {
+            return new ArrayList<>(saved.values());
+        }
+
+        @Override
+        public void close() {
+        }
+    }
+
     private LoanService newService() {
-        return new LoanService(new LoanRepository());
+        return new LoanService(new LoanRepository(), new InMemoryLoanStorage(), Logger.getGlobal());
     }
 
     private Loan newLoan(UUID lenderUUID) {

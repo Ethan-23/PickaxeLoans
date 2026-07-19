@@ -3,6 +3,7 @@ package io.github.ethan23.pickaxeLoans;
 import io.github.ethan23.pickaxeLoans.model.ActiveLoan;
 import io.github.ethan23.pickaxeLoans.model.Loan;
 import io.github.ethan23.pickaxeLoans.model.LoanDeal;
+import io.github.ethan23.pickaxeLoans.service.LoanRepository;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
