@@ -1,6 +1,7 @@
 package io.github.ethan23.pickaxeLoans.gui.menu;
 
 import io.github.ethan23.pickaxeLoans.cosmic.service.CosmicPlayerService;
+import io.github.ethan23.pickaxeLoans.model.LoanResult;
 import io.github.ethan23.pickaxeLoans.service.LoanService;
 import io.github.ethan23.pickaxeLoans.item.PickaxeChecker;
 import io.github.ethan23.pickaxeLoans.gui.*;
@@ -95,11 +96,15 @@ public class LoanListingMenu extends InventoryGUI {
                 return;
             }
 
-            player.sendMessage(ColorTextBuilder.parse("<yellow>You have returned your loan."));
-            loanService.returnLoan(loan.getLoanUUID());
-            PickaxeChecker.removeLoan(loanService, this.playerUUID);
-            buildCurrentLoanAgreementButton();
-            decorate();
+
+            LoanResult loanResult = loanService.returnLoan(loan.getLoanUUID());
+
+            if (loanResult == LoanResult.SUCCESS) {
+                player.sendMessage(ColorTextBuilder.parse("<yellow>You have returned your loan."));
+                PickaxeChecker.removeLoan(loanService, this.playerUUID);
+                buildCurrentLoanAgreementButton();
+                decorate();
+            }
         }));
     }
 
