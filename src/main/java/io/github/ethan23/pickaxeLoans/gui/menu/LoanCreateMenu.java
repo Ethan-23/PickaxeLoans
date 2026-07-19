@@ -141,7 +141,10 @@ public class LoanCreateMenu extends InventoryGUI {
             }
             this.pickaxeSlot = foundSlot;
             LoanResult loanResult = loanService.createListing(new Loan(pickaxeItem, player.getUniqueId(), loanDeal));
-            if(loanResult == LoanResult.DUPLICATE_LOAN){
+            if(loanResult == LoanResult.MAX_LOANS){
+                player.sendMessage(parse("<red>You can only create 3 loans at a time!"));
+                return;
+            } else if(loanResult == LoanResult.DUPLICATE_LOAN){
                 player.sendMessage(parse("<red>There was an error creating your loan!"));
                 return;
             }

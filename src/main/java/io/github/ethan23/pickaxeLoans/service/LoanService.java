@@ -16,6 +16,7 @@ public class LoanService {
     private final Logger logger;
 
     private static final int DECIMAL_MOVEMENT = 2;
+    private static final int MAX_LOAN_COUNT = 3;
 
     public LoanService(LoanRepository repository, LoanStorage loanStorage, Logger logger) {
         this.repository = repository;
@@ -25,6 +26,10 @@ public class LoanService {
     }
 
     public LoanResult createListing(Loan loan) {
+        if(repository.getLoansByLender(loan.getLenderUUID()).size() >= MAX_LOAN_COUNT){
+            return LoanResult.MAX_LOANS;
+        }
+
         if (!repository.add(loan)) {
             return LoanResult.DUPLICATE_LOAN;
         }

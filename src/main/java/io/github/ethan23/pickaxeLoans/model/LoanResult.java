@@ -7,5 +7,6 @@ public enum LoanResult {
     NOT_BORROWED,
     ALREADY_BORROWING,
     LENDERS_LOAN,
-    DUPLICATE_LOAN
+    DUPLICATE_LOAN,
+    MAX_LOANS
 }
