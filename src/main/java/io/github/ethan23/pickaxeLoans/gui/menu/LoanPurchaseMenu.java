@@ -108,6 +108,7 @@ public class LoanPurchaseMenu extends InventoryGUI {
 
         if(costType == CostType.ENERGY){
             cosmicPlayerService.removeEnergy(playerUUID, cost);
+            cosmicPlayerService.addEnergy(loan.getLenderUUID(), cost);
         } else {
             //Money check would go here if I implemented an economy :)
             player.sendMessage(ColorTextBuilder.parse("<yellow>Money was not implemented here so have the pickaxe for free!"));
