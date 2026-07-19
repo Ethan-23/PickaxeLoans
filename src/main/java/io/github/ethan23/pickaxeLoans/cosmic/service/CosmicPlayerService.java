@@ -36,4 +36,8 @@ public class CosmicPlayerService {
         PlayerData playerData = this.cosmicPlayerRepository.getPlayer(uuid);
         return playerData == null ? BigDecimal.ZERO : playerData.getEnergy();
     }
+
+    public void removeEnergy(UUID uuid, BigDecimal amount) {
+        this.cosmicPlayerRepository.getPlayer(uuid).removeEnergy(amount);
+    }
 }

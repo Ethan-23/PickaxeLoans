@@ -63,7 +63,7 @@ public class LoanService {
             return LoanResult.NOT_FOUND;
         }
 
-        if(borrowerUUID.equals(loan.getLoanUUID())){
+        if(borrowerUUID.equals(loan.getLenderUUID())){
             return LoanResult.LENDERS_LOAN;
         }
 
@@ -77,7 +77,7 @@ public class LoanService {
         return LoanResult.SUCCESS;
     }
 
-    public LoanResult exprire(Loan loan){
+    public LoanResult expire(Loan loan){
 
         if(loan.getLoanState() != LoanState.LISTED){
             return LoanResult.NOT_LISTED;
@@ -162,7 +162,7 @@ public class LoanService {
             if (loan == null || loan.getListingExpiresAt() > System.currentTimeMillis()) {
                 break;
             }
-            exprire(repository.peekNextExpiration());
+            expire(repository.peekNextExpiration());
             repository.removeTopExpiration();
         }
     }

@@ -9,6 +9,11 @@ commands:
   loan:
     aliases: [loans]
     description: handles pickaxe loan system
+    permission: cosmicprisons.loan
+permissions:
+  cosmicprisons.loan:
+    description: Allows use of /loan command
+    default: true
 
 libraries:
   - org.xerial:sqlite-jdbc:3.53.2.0
