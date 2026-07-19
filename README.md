@@ -75,6 +75,13 @@ Notable places where the implementation evolved past the plan:
 - A `LENDERS_LOAN` result was added to stop lenders borrowing their own pickaxe
 - The planned "pickaxe level 20+" and whitescroll listing requirements were simplified to a pickaxe-type check
 
+## Gameplay Example
+*If you wish to test yourself get a pickaxe (excluding copper and netherite). Mining any ore available on cosmic prisons will grant rewards.*
+
+<a href="https://youtu.be/SDUTaae_Ehs">
+<img src="https://static.vecteezy.com/system/resources/thumbnails/053/225/902/small/watch-now-button-with-pointer-clicking-web-button-finger-pressing-click-to-watch-now-concept-illustration-png.png" width="100%" height="auto" alt="Clickable Image">
+</a>
+
 ## Building & running
 
 Requires **Java 21**.
