@@ -1,5 +1,6 @@
 package io.github.ethan23.pickaxeLoans;
 
+import io.github.ethan23.pickaxeLoans.config.LoanConfig;
 import io.github.ethan23.pickaxeLoans.model.Loan;
 import io.github.ethan23.pickaxeLoans.model.LoanDeal;
 import io.github.ethan23.pickaxeLoans.model.LoanResult;
@@ -17,12 +18,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class LoanServiceTest {
 
+    private static final long LISTING_DURATION_MILLIS = 3_600_000L;
+
+    /** The pre-config hard-coded values, now stated explicitly. */
+    private static LoanConfig defaultConfig() {
+        return new LoanConfig(3, LISTING_DURATION_MILLIS, 0, 1_000_000_000L, 10, 60, 0, 100, 0, 100);
+    }
+
     private LoanService newService() {
-        return new LoanService(new LoanRepository(), new InMemoryLoanStorage(), Logger.getGlobal());
+        return new LoanService(new LoanRepository(), new InMemoryLoanStorage(), Logger.getGlobal(), defaultConfig());
     }
 
     private Loan newLoan(UUID lenderUUID) {
-        return new Loan(null, lenderUUID, new LoanDeal());
+        return new Loan(null, lenderUUID, new LoanDeal(), LISTING_DURATION_MILLIS);
     }
 
     @Test
@@ -182,7 +190,7 @@ public class LoanServiceTest {
     private Loan newInstantlyOverdueLoan(UUID lenderUUID) {
         LoanDeal deal = new LoanDeal();
         deal.setLoanDurationMillis(0);
-        return new Loan(null, lenderUUID, deal);
+        return new Loan(null, lenderUUID, deal, LISTING_DURATION_MILLIS);
     }
 
     @Test
@@ -244,6 +252,16 @@ public class LoanServiceTest {
     }
 
     @Test
+    void createListing_respectsConfiguredLimit() {
+        LoanConfig oneListingConfig = new LoanConfig(1, LISTING_DURATION_MILLIS, 0, 1_000_000_000L, 10, 60, 0, 100, 0, 100);
+        LoanService service = new LoanService(new LoanRepository(), new InMemoryLoanStorage(), Logger.getGlobal(), oneListingConfig);
+        UUID lender = UUID.randomUUID();
+
+        assertEquals(LoanResult.SUCCESS, service.createListing(newLoan(lender)));
+        assertEquals(LoanResult.MAX_LOANS, service.createListing(newLoan(lender)));
+    }
+
+    @Test
     void borrow_ownLoan_isRejected() {
         LoanService service = newService();
         UUID lender = UUID.randomUUID();
@@ -278,7 +296,7 @@ public class LoanServiceTest {
     @Test
     void deleteLoan_removesFromServiceAndStorage() {
         InMemoryLoanStorage storage = new InMemoryLoanStorage();
-        LoanService service = new LoanService(new LoanRepository(), storage, Logger.getGlobal());
+        LoanService service = new LoanService(new LoanRepository(), storage, Logger.getGlobal(), defaultConfig());
         Loan loan = newLoan(UUID.randomUUID());
         service.createListing(loan);
 
@@ -291,7 +309,7 @@ public class LoanServiceTest {
     @Test
     void loadFromStorage_restoresListedAndBorrowedLoans() {
         InMemoryLoanStorage storage = new InMemoryLoanStorage();
-        LoanService original = new LoanService(new LoanRepository(), storage, Logger.getGlobal());
+        LoanService original = new LoanService(new LoanRepository(), storage, Logger.getGlobal(), defaultConfig());
         UUID borrower = UUID.randomUUID();
         Loan listed = newLoan(UUID.randomUUID());
         Loan borrowed = newLoan(UUID.randomUUID());
@@ -299,7 +317,7 @@ public class LoanServiceTest {
         original.createListing(borrowed);
         original.borrow(borrower, borrowed.getLoanUUID());
 
-        LoanService reloaded = new LoanService(new LoanRepository(), storage, Logger.getGlobal());
+        LoanService reloaded = new LoanService(new LoanRepository(), storage, Logger.getGlobal(), defaultConfig());
         reloaded.loadFromStorage();
 
         assertTrue(reloaded.getListedLoans().contains(listed));

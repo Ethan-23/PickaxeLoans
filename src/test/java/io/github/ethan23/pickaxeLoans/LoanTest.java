@@ -15,7 +15,7 @@ public class LoanTest {
     private static final long LISTING_EXPIRATION_MILLIS = 60 * 60 * 1000;
 
     private Loan newLoan() {
-        return new Loan(null, UUID.randomUUID(), new LoanDeal());
+        return new Loan(null, UUID.randomUUID(), new LoanDeal(), LISTING_EXPIRATION_MILLIS);
     }
 
     private ActiveLoan newActiveLoan() {
@@ -32,7 +32,7 @@ public class LoanTest {
     }
 
     @Test
-    void newLoan_listingExpiresOneHourAfterCreation() {
+    void newLoan_listingExpiresWhenTheCallerSaid() {
         Loan loan = newLoan();
 
         assertEquals(loan.getCreatedAt() + LISTING_EXPIRATION_MILLIS, loan.getListingExpiresAt());

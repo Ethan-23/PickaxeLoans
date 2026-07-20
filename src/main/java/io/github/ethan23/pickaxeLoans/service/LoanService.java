@@ -1,5 +1,6 @@
 package io.github.ethan23.pickaxeLoans.service;
 
+import io.github.ethan23.pickaxeLoans.config.LoanConfig;
 import io.github.ethan23.pickaxeLoans.database.LoanStorage;
 import io.github.ethan23.pickaxeLoans.model.*;
 
@@ -24,32 +25,40 @@ public class LoanService {
     private final LoanStorage loanStorage;
     private final Set<UUID> dirtyLoans;
     private final Logger logger;
+    private final LoanConfig config;
 
     /** Number of decimal places used when converting percentage values. */
     private static final int DECIMAL_MOVEMENT = 2;
 
-    /** Maximum number of active listings a lender may have. */
-    private static final int MAX_LOAN_COUNT = 3;
 
-
-    public LoanService(LoanRepository repository, LoanStorage loanStorage, Logger logger) {
+    public LoanService(LoanRepository repository, LoanStorage loanStorage, Logger logger, LoanConfig config) {
         this.repository = repository;
         this.loanStorage = loanStorage;
         this.logger = logger;
+        this.config = config;
         this.dirtyLoans = new HashSet<>();
+    }
+
+    /**
+     * The validated configuration this service was created with. Menus read
+     * their input bounds through this accessor instead of having the config
+     * threaded through every constructor.
+     */
+    public LoanConfig getConfig() {
+        return config;
     }
 
     /**
      * Creates a new loan listing.
      *
-     * <p>The lender may have at most {@value #MAX_LOAN_COUNT} active listings.
-     * On success, the loan is added to the repository and persisted.
+     * <p>The lender may have at most the configured maximum number of active
+     * listings. On success, the loan is added to the repository and persisted.
      *
      * @param loan the loan to create
      * @return the result of the creation attempt
      */
     public LoanResult createListing(Loan loan) {
-        if(repository.getLoansByLender(loan.getLenderUUID()).size() >= MAX_LOAN_COUNT){
+        if(repository.getLoansByLender(loan.getLenderUUID()).size() >= config.getMaxListingsPerPlayer()){
             return LoanResult.MAX_LOANS;
         }
 

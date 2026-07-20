@@ -1,5 +1,6 @@
 package io.github.ethan23.pickaxeLoans;
 
+import io.github.ethan23.pickaxeLoans.config.LoanConfig;
 import io.github.ethan23.pickaxeLoans.model.Loan;
 import io.github.ethan23.pickaxeLoans.model.LoanDeal;
 import io.github.ethan23.pickaxeLoans.service.LoanRepository;
@@ -14,12 +15,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class LoanServiceTaxTest {
 
+    private static final long LISTING_DURATION_MILLIS = 3_600_000L;
+
     private InMemoryLoanStorage storage;
     private LoanService service;
 
+    private static LoanConfig defaultConfig() {
+        return new LoanConfig(3, LISTING_DURATION_MILLIS, 0, 1_000_000_000L, 10, 60, 0, 100, 0, 100);
+    }
+
     private LoanService newService() {
         storage = new InMemoryLoanStorage();
-        service = new LoanService(new LoanRepository(), storage, Logger.getGlobal());
+        service = new LoanService(new LoanRepository(), storage, Logger.getGlobal(), defaultConfig());
         return service;
     }
 
@@ -27,7 +34,7 @@ public class LoanServiceTaxTest {
         LoanDeal deal = new LoanDeal();
         deal.setXpTaxPercent(xpTaxPercent);
         deal.setEnergyTaxPercent(energyTaxPercent);
-        Loan loan = new Loan(null, UUID.randomUUID(), deal);
+        Loan loan = new Loan(null, UUID.randomUUID(), deal, LISTING_DURATION_MILLIS);
         service.createListing(loan);
         service.borrow(UUID.randomUUID(), loan.getLoanUUID());
         return loan;

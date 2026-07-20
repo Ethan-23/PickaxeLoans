@@ -14,8 +14,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class LoanRepositoryTest {
 
+    private static final long LISTING_DURATION_MILLIS = 3_600_000L;
+
     private Loan newLoan(UUID lenderUUID) {
-        return new Loan(null, lenderUUID, new LoanDeal());
+        return new Loan(null, lenderUUID, new LoanDeal(), LISTING_DURATION_MILLIS);
     }
 
     private Loan borrowedLoan(UUID lenderUUID, UUID borrowerUUID, long durationMillis) {

@@ -82,6 +82,21 @@ Notable places where the implementation evolved past the plan:
 <img src="https://static.vecteezy.com/system/resources/thumbnails/053/225/902/small/watch-now-button-with-pointer-clicking-web-button-finger-pressing-click-to-watch-now-concept-illustration-png.png" width="100%" height="auto" alt="Clickable Image">
 </a>
 
+## Configuration
+
+`config.yml` is created in the plugin folder on first run. All values are validated on load — out-of-range values are clamped and inverted min/max pairs fall back to defaults, each with a console warning — so a bad config degrades loudly instead of disabling the loan market.
+
+| Key | Default | Meaning |
+|---|---|---|
+| `loans.max-listings-per-player` | 3 | Active listings a lender may have at once (capped at 45, the menu's capacity) |
+| `loans.listing-expiry-minutes` | 60 | How long a listing stays on the market |
+| `limits.upfront-cost.min/max` | 0 / 1000000000 | Allowed range for a deal's upfront cost |
+| `limits.duration-minutes.min/max` | 10 / 60 | Allowed range for a deal's duration |
+| `limits.xp-tax-percent.min/max` | 0 / 100 | Allowed range for the XP tax (hard-capped at 100%) |
+| `limits.energy-tax-percent.min/max` | 0 / 100 | Allowed range for the energy tax (hard-capped at 100%) |
+
+Loans snapshot their deal terms at creation, so config changes only affect listings created after a restart — existing loans keep the terms both sides agreed to.
+
 ## Building & running
 
 Requires **Java 21**.
