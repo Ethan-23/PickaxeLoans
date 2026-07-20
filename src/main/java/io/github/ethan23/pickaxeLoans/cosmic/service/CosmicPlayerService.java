@@ -20,24 +20,40 @@ public class CosmicPlayerService {
     }
 
     public void addEnergy(UUID uuid, BigDecimal amount){
+        if(this.cosmicPlayerRepository.getPlayer(uuid) == null){
+            return;
+        }
         this.cosmicPlayerRepository.getPlayer(uuid).increaseEnergy(amount);
     }
 
     public void addExperience(UUID uuid, BigDecimal amount){
+        if(this.cosmicPlayerRepository.getPlayer(uuid) == null){
+            return;
+        }
         this.cosmicPlayerRepository.getPlayer(uuid).increaseExperience(amount);
     }
 
     public BigDecimal getExperience(UUID uuid){
+        if(this.cosmicPlayerRepository.getPlayer(uuid) == null){
+            return BigDecimal.ZERO;
+        }
         PlayerData playerData = this.cosmicPlayerRepository.getPlayer(uuid);
         return playerData == null ? BigDecimal.ZERO : playerData.getExperience();
     }
 
     public BigDecimal getEnergy(UUID uuid){
+        if(this.cosmicPlayerRepository.getPlayer(uuid) == null){
+            return BigDecimal.ZERO;
+        }
         PlayerData playerData = this.cosmicPlayerRepository.getPlayer(uuid);
         return playerData == null ? BigDecimal.ZERO : playerData.getEnergy();
     }
 
     public void removeEnergy(UUID uuid, BigDecimal amount) {
+        if(this.cosmicPlayerRepository.getPlayer(uuid) == null){
+            return;
+        }
+
         this.cosmicPlayerRepository.getPlayer(uuid).removeEnergy(amount);
     }
 }
