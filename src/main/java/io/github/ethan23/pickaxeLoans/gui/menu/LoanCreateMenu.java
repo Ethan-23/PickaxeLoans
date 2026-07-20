@@ -1,5 +1,6 @@
 package io.github.ethan23.pickaxeLoans.gui.menu;
 
+import io.github.ethan23.pickaxeLoans.config.LoanConfig;
 import io.github.ethan23.pickaxeLoans.service.LoanService;
 import io.github.ethan23.pickaxeLoans.item.PickaxeChecker;
 import io.github.ethan23.pickaxeLoans.gui.Buttons;
@@ -34,12 +35,6 @@ public class LoanCreateMenu extends InventoryGUI {
     private static final int ENERGY_TAX_SLOT = 34;
     private static final int CONFIRM_BUTTON_SLOT = 49;
     private static final int GUIDE_SLOT = 53;
-    private static final long MIN_UPFRONT_COST   = 0L;
-    private static final long MAX_UPFRONT_COST   = 1_000_000_000L;
-    private static final long MIN_LOAN_MINUTES    = 10;
-    private static final long MAX_LOAN_MINUTES    = 60;
-    private static final int  MIN_TAX_PERCENT     = 0;
-    private static final int  MAX_TAX_PERCENT     = 100;
     private static final long MILLIS_PER_MINUTE   = 60_000L;
 
     private final LoanDeal loanDeal;
@@ -47,16 +42,19 @@ public class LoanCreateMenu extends InventoryGUI {
     private int pickaxeSlot;
     private final Player player;
     private final LoanService loanService;
+    private final LoanConfig config;
     private final PlayerInputListener playerInputListener;
 
     public LoanCreateMenu(PlayerInputListener playerInputListener, LoanService loanService, Player player, ItemStack pickaxeItem, int slot) {
         super(INVENTORY_SIZE, INVENTORY_TITLE);
         this.pickaxeItem = pickaxeItem;
         this.pickaxeSlot = slot;
-        this.loanDeal = new LoanDeal();
         this.player = player;
         this.loanService = loanService;
+        this.config = loanService.getConfig();
         this.playerInputListener = playerInputListener;
+        this.loanDeal = new LoanDeal();
+        clampDealToBounds();
 
 
 
@@ -75,18 +73,39 @@ public class LoanCreateMenu extends InventoryGUI {
         renderClickable();
     }
 
+    /**
+     * Forces the deal's starting values into the configured bounds, so the
+     * menu never opens pre-loaded with terms the server owner has
+     * disallowed (e.g. a 30-minute default when the configured maximum
+     * duration is 20).
+     */
+    private void clampDealToBounds() {
+        loanDeal.setUpfrontCost(Math.clamp(loanDeal.getUpfrontCost(), config.getUpfrontCostMin(), config.getUpfrontCostMax()));
+        long durationMinutes = loanDeal.getLoanDurationMillis() / MILLIS_PER_MINUTE;
+        loanDeal.setLoanDurationMillis(Math.clamp(durationMinutes, config.getDurationMinutesMin(), config.getDurationMinutesMax()) * MILLIS_PER_MINUTE);
+        loanDeal.setXpTaxPercent(Math.clamp(loanDeal.getXpTaxPercent(), config.getXpTaxMin(), config.getXpTaxMax()));
+        loanDeal.setEnergyTaxPercent(Math.clamp(loanDeal.getEnergyTaxPercent(), config.getEnergyTaxMin(), config.getEnergyTaxMax()));
+    }
+
     private void renderClickable(){
 
         addButton(PICKAXE_PREVIEW_SLOT, new InventoryButton(pickaxeItem, event -> {}));
 
         boolean isMoney = loanDeal.getCostType() == CostType.MONEY;
         String cost = NumberConversions.formattedNumberDisplay(loanDeal.getUpfrontCost());
+        String costMin = NumberConversions.formattedNumberDisplay((double) config.getUpfrontCostMin());
+        String costMax = NumberConversions.formattedNumberDisplay((double) config.getUpfrontCostMax());
+        String costRange = isMoney
+                ? "<green>$" + costMin + " <gray>- <green>$" + costMax
+                : "<white>" + costMin + " <gray>- <white>" + costMax;
 
         addButton(UPFRONT_COST_SLOT, new InventoryButton(
                 ItemBuilder.of(
                         isMoney ? Material.PAPER : Material.LIGHT_BLUE_DYE,
                         "<bold><yellow>Loan Cost",
                         isMoney ? "<green>$" + cost : "<white>" + cost + " <aqua>Cosmic Energy",
+                        "",
+                        "<gray>Range: " + costRange,
                         "",
                         "<yellow>Left-Click <gray>to edit value",
                         "<yellow>Right-Click <gray>to swap type"
@@ -101,7 +120,7 @@ public class LoanCreateMenu extends InventoryGUI {
                         renderClickable();
                         player.updateInventory();
                     } else if (e.isLeftClick()) {
-                        promptForNumber(MIN_UPFRONT_COST, MAX_UPFRONT_COST, loanDeal::setUpfrontCost);
+                        promptForNumber(config.getUpfrontCostMin(), config.getUpfrontCostMax(), loanDeal::setUpfrontCost);
                     }
                 }
         ));
@@ -112,9 +131,11 @@ public class LoanCreateMenu extends InventoryGUI {
                         "<bold><yellow>Total Loan Time",
                         "<white>" + NumberConversions.timeFromMillis(loanDeal.getLoanDurationMillis()),
                         "",
+                        "<gray>Range: <white>" + config.getDurationMinutesMin() + " <gray>- <white>" + config.getDurationMinutesMax() + " <gray>minutes",
+                        "",
                         "<yellow>Left-Click <gray>to edit value"
                 ),
-                e -> promptForNumber(MIN_LOAN_MINUTES,  MAX_LOAN_MINUTES,value -> loanDeal.setLoanDurationMillis(value * MILLIS_PER_MINUTE))
+                e -> promptForNumber(config.getDurationMinutesMin(), config.getDurationMinutesMax(), value -> loanDeal.setLoanDurationMillis(value * MILLIS_PER_MINUTE))
         ));
 
         addButton(XP_TAX_SLOT, new InventoryButton(
@@ -123,9 +144,11 @@ public class LoanCreateMenu extends InventoryGUI {
                         "<bold><yellow>Loan XP Tax",
                         "<white>" + loanDeal.getXpTaxPercent() + "%",
                         "",
+                        "<gray>Range: <white>" + config.getXpTaxMin() + "% <gray>- <white>" + config.getXpTaxMax() + "%",
+                        "",
                         "<yellow>Left-Click <gray>to edit value"
                 ),
-                e -> promptForNumber(MIN_TAX_PERCENT, MAX_TAX_PERCENT, value -> loanDeal.setXpTaxPercent((int) value))
+                e -> promptForNumber(config.getXpTaxMin(), config.getXpTaxMax(), value -> loanDeal.setXpTaxPercent((int) value))
         ));
 
         addButton(ENERGY_TAX_SLOT, new InventoryButton(
@@ -134,10 +157,12 @@ public class LoanCreateMenu extends InventoryGUI {
                         "<bold><yellow>Loan Energy Tax",
                         "<white>" + loanDeal.getEnergyTaxPercent() + "%",
                         "",
+                        "<gray>Range: <white>" + config.getEnergyTaxMin() + "% <gray>- <white>" + config.getEnergyTaxMax() + "%",
+                        "",
                         "<yellow>Left-Click <gray>to edit value"
                 )
                 ,
-                e -> promptForNumber(MIN_TAX_PERCENT, MAX_TAX_PERCENT, value -> loanDeal.setEnergyTaxPercent((int) value))
+                e -> promptForNumber(config.getEnergyTaxMin(), config.getEnergyTaxMax(), value -> loanDeal.setEnergyTaxPercent((int) value))
 
         ));
 
@@ -150,9 +175,9 @@ public class LoanCreateMenu extends InventoryGUI {
                 return;
             }
             this.pickaxeSlot = foundSlot;
-            LoanResult loanResult = loanService.createListing(new Loan(pickaxeItem, player.getUniqueId(), loanDeal));
+            LoanResult loanResult = loanService.createListing(new Loan(pickaxeItem, player.getUniqueId(), loanDeal, config.getListingExpiryMillis()));
             if(loanResult == LoanResult.MAX_LOANS){
-                player.sendMessage(parse("<red>You can only create 3 loans at a time!"));
+                player.sendMessage(parse("<red>You can only create " + config.getMaxListingsPerPlayer() + " loans at a time!"));
                 return;
             } else if(loanResult == LoanResult.DUPLICATE_LOAN){
                 player.sendMessage(parse("<red>There was an error creating your loan!"));

@@ -34,9 +34,6 @@ public class Loan {
     private LoanState loanState;
     private ActiveLoan activeLoan;
 
-    /** How long a listing stays on the market before it expires. */
-    private final static long EXPIRATION_TIME = 1000 * 60 * 60;
-
     private Loan(ActiveLoan activeLoan, LoanState loanState, long createdAt, long listingExpiresAt, LoanDeal loanDeal, UUID lenderUUID, ItemStack pickaxe, UUID loanUUID) {
         this.activeLoan = activeLoan;
         this.loanState = loanState;
@@ -50,20 +47,25 @@ public class Loan {
 
     /**
      * Creates a new {@link LoanState#LISTED} loan holding the given pickaxe
-     * in escrow. The listing expires {@value #EXPIRATION_TIME} milliseconds
-     * after creation.
+     * in escrow. The listing expires {@code listingDurationMillis}
+     * milliseconds after creation.
+     *
+     * <p>The duration is supplied by the caller (from the plugin config)
+     * rather than read here, so this model stays free of any configuration
+     * or Bukkit dependency.
      *
      * @param pickaxe the pickaxe to hold in escrow
      * @param lenderUUID the player listing the pickaxe
      * @param loanDeal the deal terms offered to borrowers
+     * @param listingDurationMillis how long the listing stays on the market
      */
-    public Loan(ItemStack pickaxe, UUID lenderUUID, LoanDeal loanDeal) {
+    public Loan(ItemStack pickaxe, UUID lenderUUID, LoanDeal loanDeal, long listingDurationMillis) {
         this.loanUUID = UUID.randomUUID();
         this.pickaxe = pickaxe;
         this.lenderUUID = lenderUUID;
         this.loanDeal = loanDeal;
         this.createdAt = System.currentTimeMillis();
-        this.listingExpiresAt = this.createdAt + EXPIRATION_TIME;
+        this.listingExpiresAt = this.createdAt + listingDurationMillis;
         this.loanState = LoanState.LISTED;
         this.activeLoan = null;
     }

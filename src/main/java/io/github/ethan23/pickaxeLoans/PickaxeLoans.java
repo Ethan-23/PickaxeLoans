@@ -2,6 +2,7 @@ package io.github.ethan23.pickaxeLoans;
 
 import io.github.ethan23.pickaxeLoans.commands.LoanCommand;
 import io.github.ethan23.pickaxeLoans.commands.LoanCommandTabComplete;
+import io.github.ethan23.pickaxeLoans.config.LoanConfig;
 import io.github.ethan23.pickaxeLoans.cosmic.CosmicModule;
 import io.github.ethan23.pickaxeLoans.events.InventoryMoveItemListener;
 import io.github.ethan23.pickaxeLoans.task.DirtyLoanCleaner;
@@ -46,6 +47,10 @@ public final class PickaxeLoans extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
+        //Config
+        saveDefaultConfig();
+        LoanConfig loanConfig = LoanConfig.fromFileConfiguration(getConfig(), getLogger());
+
         //Storage
         this.storage = new SqliteLoanStorage(getDataFolder().toPath().resolve("loans.db"));
         try {
@@ -57,7 +62,7 @@ public final class PickaxeLoans extends JavaPlugin {
         }
 
         LoanRepository loanRepository = new LoanRepository();
-        this.loanService = new LoanService(loanRepository, this.storage, getLogger());
+        this.loanService = new LoanService(loanRepository, this.storage, getLogger(), loanConfig);
         this.loanService.loadFromStorage();
 
         //Cosmic Module

@@ -1,0 +1,17 @@
+loans:
+  max-listings-per-player: 3
+  listing-expiry-minutes: 60
+
+limits:
+  upfront-cost:
+    min: 0
+    max: 1000000000
+  duration-minutes:
+    min: 10
+    max: 60
+  xp-tax-percent:
+    min: 0
+    max: 100
+  energy-tax-percent:
+    min: 0
+    max: 100
